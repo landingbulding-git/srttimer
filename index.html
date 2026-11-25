@@ -232,8 +232,9 @@ function moveGroup(c,dt){const{blocks,orig}=c,W=D.words;let lo=-1e9,hi=1e9;
     if(auto&&a>0){const P=orig[a-1],ns=W[a].s;W[a-1].e=r3(Math.abs(P.e-orig[a].s)<.005?ns:Math.min(P.e,ns));touched.add(a-1)}
     if(auto&&b<W.length-1){const N=orig[b+1],ne=W[b].e;W[b+1].s=r3(Math.abs(N.s-orig[b].e)<.005?ne:Math.max(N.s,ne));touched.add(b+1)}});
   touched.forEach(k=>place('w',k))}
-function cut(side){if(!sel||sel.t!=='w')return toast('Select a word first');const i=sel.i,w=D.words[i],t=r3(au.currentTime);
-  if(t<=w.s+.01||t>=w.e-.01)return toast('Put the playhead inside the selected word (click on it)');snap();
+function cut(side){const t=r3(au.currentTime),i=D.words.findIndex(x=>t>=x.s&&t<x.e);
+  if(i<0)return toast('No word under the playhead');const w=D.words[i];sel={t:'w',i};selW=new Set([i]);markSel();
+  if(t<=w.s+.01||t>=w.e-.01)return toast('Playhead is at the very edge of the word — move it inside');snap();
   if(side==='L'){const cutLen=t-w.s;if(auto&&i>0)D.words[i-1].e=r3(D.words[i-1].e+cutLen);w.s=t}
   else if(side==='R'){const cutLen=w.e-t;if(auto&&i<D.words.length-1)D.words[i+1].s=r3(D.words[i+1].s-cutLen);w.e=t}
   else{const parts=w.text.split(/\s+/);let a=w.text,b=w.text;if(parts.length>1){const h=Math.ceil(parts.length/2);a=parts.slice(0,h).join(' ');b=parts.slice(h).join(' ')}
