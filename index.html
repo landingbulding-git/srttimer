@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lyric Sync</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=Inter+Tight:wght@400;500;600&display=swap&subset=latin-ext" rel="stylesheet">
+<style>
+/* VOICE: a video editor, dark and quiet, nothing but the job.
+   IDEA: CapCut-style timeline — waveform, scene clips, one clip per word.
+   PICTURE: the preview monitor playing the real lyric animation in sync.
+   COLOUR and TYPE: near-black editor, teal word clips, amber scene clips, red playhead; Inter Tight.
+   LAYOUT: toolbar, monitor (top), full-width timeline (bottom). */
+:root{color-scheme:dark;--bg:#0f0f10;--pan:#18181b;--line:#2a2a2f;--ink:#ececf1;--mut:#8b8b94;--word:#1f6f6a;--wordb:#35b3a9;--scene:#5a4320;--sceneb:#e0a24a;--ph:#ff4d4d;--sel:#fff}
+*{box-sizing:border-box;min-width:0}[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Inter Tight",system-ui,sans-serif;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+button,.fb,select{font:inherit;color:inherit;min-height:36px;padding:0 12px;border-radius:7px;border:1px solid var(--line);background:var(--pan);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px solid var(--wordb);outline-offset:1px}
+.fb input{display:none}.fb.ok{border-color:var(--wordb);color:var(--wordb)}
+#play{background:var(--ink);color:#000;border-color:var(--ink);min-width:80px;justify-content:center;font-weight:600}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.clock{font-variant-numeric:tabular-nums;font-size:16px;margin:0 8px;min-width:150px}
+.sp{flex:1}
+.mon-wrap{display:grid;place-items:center;padding:10px;min-height:0}
+.mon{position:relative;height:100%;max-width:100%;aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+#bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.msg{position:absolute;inset:0;display:grid;place-items:center;color:#bbb;font-size:16px;text-align:center;padding:20px}
+.tl-head{display:flex;gap:10px;align-items:center;padding:6px 12px;border-top:1px solid var(--line);color:var(--mut);font-size:12px;flex-wrap:wrap}
+.tl-head b{color:var(--ink);font-weight:500}
+.tools{display:flex;gap:4px;align-items:center;margin-right:8px}.tools button{min-height:34px;padding:0 8px}.tools svg{width:20px;height:20px}
+.tog{font-size:13px}.tog::before{content:"";width:10px;height:10px;border-radius:50%;background:#555}.tog.on{border-color:var(--wordb);color:var(--wordb)}.tog.on::before{background:var(--wordb);box-shadow:0 0 6px var(--wordb)}
+#tl{position:relative;height:250px;overflow-x:auto;overflow-y:hidden;background:var(--pan);user-select:none}
+#inner{position:relative;height:100%}
+#wave{position:absolute;top:0;height:96px;pointer-events:none}
+.ruler-hit{position:absolute;top:0;left:0;right:0;height:96px;cursor:pointer}
+.track{position:absolute;left:0;right:0}
+#tScenes{top:102px;height:52px}#tWords{top:160px;height:72px}
+.lab{position:sticky;left:0;z-index:6;display:inline-block;font-size:11px;color:var(--mut);background:var(--pan);padding:2px 6px;border-radius:0 0 5px 0}
+.clip{position:absolute;top:16px;bottom:2px;border-radius:5px;display:flex;align-items:center;padding:0 8px;overflow:hidden;white-space:nowrap;cursor:grab;font-size:13px}
+.clip.w{background:var(--word);border:1px solid var(--wordb)}
+.clip.l{background:var(--scene);border:1px solid var(--sceneb);color:#ffe9c8;font-size:12px}
+.clip.sel{outline:2px solid var(--sel);outline-offset:-1px;z-index:3}
+.clip.w.single{background:#173d3a;border-style:dashed}
+.clip.w.pin::after{content:"";position:absolute;top:4px;right:11px;width:6px;height:6px;border-radius:50%;background:#fff}
+.clip.lit{background:var(--wordb);color:#001b19}
+.clip .e{position:absolute;top:0;bottom:0;width:9px;cursor:ew-resize;z-index:2}
+.clip .e.a{left:0}.clip .e.b{right:0}
+.clip .e:hover,.clip.sel .e{background:#ffffff33}
+.clip input{position:absolute;inset:2px;font:inherit;background:#000;color:#fff;border:1px solid var(--wordb);border-radius:4px;padding:0 4px;min-width:60px}
+#ph{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ph);pointer-events:none;z-index:8}
+#ph::before{content:"";position:absolute;top:0;left:-5px;border:6px solid transparent;border-top-color:var(--ph)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#000;padding:9px 15px;border-radius:7px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+@media(prefers-reduced-motion:reduce){#toast{transition:none}}
+@media(max-width:700px){#tl{height:230px}.clock{min-width:0}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <label class="fb" id="lbT">SRT / JSON<input id="fT" type="file" accept=".srt,.json"></label>
+  <label class="fb" id="lbA">MP3<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
+  <label class="fb" id="lbB">Background<input id="fB" type="file" accept="image/*"></label>
+  <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
+  <select id="rate" aria-label="Speed"><option value="1">1×</option><option value="0.75">0.75×</option><option value="0.5">0.5×</option></select>
+  <span class="sp"></span>
+  <button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button>
+  <button id="undo">Undo</button><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
+</div>
+<div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the SRT and the MP3 (or drop them here).</div></div></div>
+<div>
+  <div class="tl-head"><div class="tools">
+      <button id="bDL" title="Delete left of playhead (Q)" aria-label="Delete left"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/><rect x="10" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="13" y="5" width="5" height="10" rx="1.5" fill="currentColor"/></svg></button>
+      <button id="bSp" title="Split at playhead (⌘B)" aria-label="Split"><svg viewBox="0 0 20 20"><rect x="1.5" y="5" width="7" height="10" rx="1.5" fill="currentColor"/><rect x="11.5" y="5" width="7" height="10" rx="1.5" fill="currentColor"/><rect x="9.2" y="2" width="1.6" height="16" fill="#ff4d4d"/></svg></button>
+      <button id="bDR" title="Delete right of playhead (W)" aria-label="Delete right"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="5" height="10" rx="1.5" fill="currentColor"/><rect x="8.4" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="11" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/></svg></button>
+      <button id="bAuto" class="tog on" title="When a word changes, the neighbouring word fills the gap">Auto-align</button></div>
+    <span id="selInfo"><b>Nothing selected</b></span><span class="sp"></span>
+    <span><b>⇧</b>-click range · <b>⌘</b>-click add · drag selected words together · <b>, .</b> nudge · <b>⌘G</b> scene · <b>⌘⇧G</b> ungroup · <b>Q</b>/<b>W</b> delete left/right · <b>⌘B</b> split · <b>Space</b> play · ⌘+wheel zoom</span></div>
+  <div id="tl"><div id="inner"><canvas id="wave"></canvas><div class="ruler-hit" id="rh"></div>
+    <div class="track" id="tScenes"><span class="lab">Scenes</span></div>
+    <div class="track" id="tWords"><span class="lab">Words</span></div><div id="ph"></div></div></div>
+</div>
+<div id="toast"></div>
+<audio id="au" preload="auto"></audio>
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=t=>{t=Math.max(0,t||0);const m=Math.floor(t/60);return m+':'+(t-m*60).toFixed(2).padStart(5,'0')};
+const toast=m=>{const e=$('toast');e.textContent=m;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1800)};
+const r3=x=>Math.round(x*1000)/1000,MINW=.04,MINL=.2;
+const au=$('au'),tl=$('tl'),inner=$('inner');
+let auto=true,pps=110,dur=0,peaks=null,sel=null,selW=new Set(),undo=[],name='';
+// D.lines: [{section,start,end}] scenes; D.words: [{text,s,e}] sorted. A word belongs to the scene containing its start;
+// a word outside every scene is shown on its own (word-by-word).
+let D={artist:'',title:'',lines:[],words:[]};
+
+/* ---------- render style (mirrors the Remotion video) ---------- */
+const FPS=30,ANTIC=6/FPS,C={ink:'#FFFFFF',inkSoft:'#FFFFFF',accent:'#FFFFFF',dim:.42};
+const SEC={verse:{size:70,weight:500,italic:1,color:C.ink,lh:1.12},list:{size:66,weight:500,italic:0,color:C.ink,lh:1.08},bridge:{size:70,weight:400,italic:1,color:C.inkSoft,lh:1.15},affirm:{size:96,weight:600,italic:0,color:C.ink,lh:1.04},outro:{size:70,weight:500,italic:1,color:C.ink,lh:1.12}};
+const EMPH=new Set('ismer húsra vadászna harapja megérintsen megérítsen megragadjon elragadjon eltaposson fényemet lelkemet egyedül naplementét szellőt szabadon virágos félnem élnem tulajdon magányos'.split(' '));
+const clean=w=>w.toLowerCase().replace(/[.,!?;:]/g,'');
+function spring(f,k,c,m){if(f<=0)return 0;const t=f/FPS,w=Math.sqrt(k/m),z=c/(2*Math.sqrt(k*m));if(z<1){const wd=w*Math.sqrt(1-z*z);return 1-Math.exp(-z*w*t)*(Math.cos(wd*t)+z*w/wd*Math.sin(wd*t))}return 1-Math.exp(-w*t)*(1+w*t)}
+const eo=p=>1-Math.pow(1-Math.min(1,Math.max(0,p)),3),ei=p=>Math.pow(Math.min(1,Math.max(0,p)),2.2);
+const SINGLE={size:120,weight:600};
+const firstT=()=>D.words.length?D.words[0].s:1e9;
+const lineOf=w=>D.lines.findIndex(l=>w.s>=l.start-1e-3&&w.s<l.end);
+const wordsOf=li=>D.words.filter(w=>lineOf(w)===li);
+function wordHtml(w,kind,now,idx,dimmed){const f=(now-(w.s-ANTIC))*FPS,st=SEC[kind],em=EMPH.has(clean(w.text));
+  if(f<0)return`<span style="display:inline-block;margin-right:.26em;opacity:0">${esc(w.text)}</span>`;
+  let o=1,x=0,y=0,s=1,b=0,tr=0;
+  if(kind==='list'){s=1.3-.3*spring(f,180,14,.6);b=Math.max(0,8-f*.8);o=Math.min(1,f/6)}
+  else if(kind==='affirm'){const p=spring(f,80,26,1.2);y=60*(1-p);tr=.14-.12*p;o=Math.min(1,f/14);b=Math.max(0,10-f*10/16)}
+  else if(kind==='bridge'){const p=eo(f/30);x=(1-p)*34;b=(1-p)*12;o=p;y=5*Math.sin(now*FPS/38+idx*.9)}
+  else{const p=eo(f/20);y=(1-p)*26;b=(1-p)*10;o=p}
+  return`<span style="display:inline-block;margin-right:.26em;opacity:${o*(dimmed?C.dim:1)};transform:translate(${x}px,${y}px) scale(${s});${b>.05?`filter:blur(${b}px);`:''}letter-spacing:${tr}em;color:${em?C.accent:st.color};font-weight:${em&&(kind==='list'||kind==='affirm')?700:st.weight}">${esc(w.text)}</span>`}
+function drawStage(now){let h='';const L=D.lines;
+  if((D.artist||D.title)&&D.words.length&&now<firstT()){const out=1-ei((now-(firstT()-1.5))/1.17);if(out>0){const ai=eo((now*FPS-20)/40);
+    h+=`<div style="position:absolute;left:460px;width:1000px;top:450px;text-align:center;font-family:'Cormorant Garamond';opacity:${out}"><div style="font-size:30px;letter-spacing:.5em;padding-left:.5em;color:${C.accent};font-weight:600;opacity:${ai};margin-bottom:6px">${esc(D.artist)}</div><div style="font-size:130px;font-weight:500;color:${C.ink};letter-spacing:.18em;padding-left:.18em">${[...D.title].map((ch,i)=>{const p=eo((now*FPS-45-i*6)/34);return`<span style="display:inline-block;opacity:${p};transform:translateY(${(1-p)*30}px);filter:blur(${(1-p)*12}px)">${esc(ch)}</span>`}).join('')}</div></div>`}}
+  L.forEach((l,li)=>{const ws=wordsOf(li);if(!ws.length)return;const from=Math.min(l.start,ws[0].s-ANTIC);if(now<from||now>l.end)return;
+    const st=SEC[l.section]||SEC.verse,ex=li===L.length-1?50:12,e=ei((now*FPS-(l.end*FPS-ex))/ex);
+    const ph=[0];ws.forEach((w,i)=>{if(i){const p=ws[i-1].text;ph[i]=ph[i-1]+((/\.$/.test(p)||(/,$/.test(p)&&/^\p{Lu}/u.test(w.text)))?1:0)}});
+    let act=0;ws.forEach((w,i)=>{if(now>=w.s-ANTIC)act=Math.max(act,ph[i])});
+    let inner='',cur=-1;ws.forEach((w,i)=>{if(ph[i]!==cur){if(cur>=0)inner+='</div>';inner+='<div>';cur=ph[i]}inner+=wordHtml(w,l.section,now,i,l.section==='list'&&ph[i]<act)});inner+='</div>';
+    h+=`<div style="position:absolute;left:160px;width:1600px;top:540px;transform:translateY(-50%) translateY(${-22*e}px);opacity:${1-e};${e>.01?`filter:blur(${8*e}px);`:''}text-align:center;font-family:'Cormorant Garamond';font-size:${st.size}px;font-style:${st.italic?'italic':'normal'};line-height:${st.lh}">${inner}</div>`});
+  D.words.forEach(w=>{if(lineOf(w)>=0)return;const f=(now-(w.s-ANTIC))*FPS;if(f<0||now>w.e)return;
+    const sp=spring(f,180,14,.6),sc=1.25-.25*sp,b=Math.max(0,8-f*.8),o=Math.min(1,f/5)*(1-ei((now*FPS-(w.e*FPS-5))/5)),em=EMPH.has(clean(w.text));
+    h+=`<div style="position:absolute;left:160px;width:1600px;top:540px;transform:translateY(-50%) scale(${sc});text-align:center;font-family:'Cormorant Garamond';font-size:${SINGLE.size}px;font-weight:${SINGLE.weight};line-height:1;opacity:${o};${b>.05?`filter:blur(${b}px);`:''}color:${em?C.accent:C.ink}">${esc(w.text)}</div>`});
+  $('stage').innerHTML=h}
+new ResizeObserver(()=>$('stage').style.transform=`scale(${$('mon').clientWidth/1920})`).observe($('mon'));
+
+/* ---------- import / export ---------- */
+const parseSrt=t=>t.replace(/\r/g,'').trim().split(/\n\s*\n/).map(b=>{const l=b.split('\n');const[a,z]=l[1].split('-->').map(x=>{const[h,m,r]=x.trim().split(':');const[s,ms]=r.split(',');return +h*3600+ +m*60+ +s+ +ms/1000});return{index:+l[0],start:a,end:z,text:l.slice(2).join(' ').trim()}});
+function fromSrt(cues){const lines=[],words=[];cues.forEach(c=>{
+  const ws=c.text.split(/\s+/).filter(Boolean),wt=ws.map(w=>w.length+2),tot=wt.reduce((a,b)=>a+b,0),span=(c.end-c.start)*.9;let acc=0;
+  ws.forEach((w,i)=>{const s=c.start+acc/tot*span;acc+=wt[i];words.push({text:w,s:r3(s),e:r3(c.start+acc/tot*span)})})});return{lines,words}}
+function fromJson(j){const lines=[],words=[];j.lines.forEach(l=>{const st=l.start??l.words[0].start;if(l.section!=='single')lines.push({section:l.section||'verse',start:st,end:l.end});
+  l.words.forEach(w=>words.push({text:w.text,s:w.start,e:w.end??w.start+.3}))});return{lines,words}}
+const toJson=()=>({version:4,artist:D.artist,title:D.title,fps:FPS,lines:[...D.lines.map((l,li)=>({section:l.section,start:l.start,end:l.end,words:wordsOf(li).map(w=>({text:w.text,start:w.s,end:w.e}))})).filter(l=>l.words.length),
+  ...D.words.filter(w=>lineOf(w)<0).map(w=>({section:'single',start:w.s,end:w.e,words:[{text:w.text,start:w.s,end:w.e}]}))].sort((a,b)=>a.start-b.start)});
+const toSrt=()=>{const f=t=>{const ms=Math.round(t*1000);return[Math.floor(ms/3600000),Math.floor(ms/60000)%60,Math.floor(ms/1000)%60].map(x=>String(x).padStart(2,'0')).join(':')+','+String(ms%1000).padStart(3,'0')};
+  return toJson().lines.map((l,i)=>`${i+1}\n${f(l.start)} --> ${f(l.end)}\n${l.words.map(w=>w.text).join(' ')}\n`).join('\n')};
+const store=()=>{try{localStorage.setItem('lyricsync4:'+name,JSON.stringify(D))}catch(e){}};
+const snap=()=>{undo.push(JSON.stringify(D));if(undo.length>300)undo.shift()};
+async function loadText(f){const txt=await f.text();name=f.name.replace(/(\.words|\.synced)?\.(srt|json)$/i,'');
+  if(/\.json$/i.test(f.name)){const j=JSON.parse(txt);D={artist:j.artist||'',title:j.title||'',...fromJson(j)}}
+  else{D={artist:'',title:'',...fromSrt(parseSrt(txt))};let sv=null,old=null;try{sv=JSON.parse(localStorage.getItem('lyricsync4:'+name));old=JSON.parse(localStorage.getItem('lyricsync3:'+name))}catch(e){}
+    if(sv&&sv.words&&sv.words.length){D=sv;toast('Your earlier edits were restored')}
+    else if(old&&old.words&&old.words.length){D={...old,lines:[]};toast('Your earlier word timings were restored (scenes cleared)')}}
+  undo=[];sel=null;selW.clear();$('lbT').classList.add('ok');ready();build()}
+async function loadAudio(f){au.src=URL.createObjectURL(f);$('lbA').classList.add('ok');ready();
+  try{const ac=new AudioContext();const buf=await ac.decodeAudioData(await f.arrayBuffer());dur=buf.duration;const ch=buf.getChannelData(0),per=Math.floor(buf.sampleRate/200),n=Math.floor(ch.length/per);
+    peaks=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*per;j<(i+1)*per;j+=3){const v=Math.abs(ch[j]);if(v>m)m=v}peaks[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)peaks[i]/=mx||1;ac.close();build()}catch(e){toast('Could not draw the waveform for this file')}}
+const ready=()=>{$('msg').hidden=!!(au.src&&D.words.length);if(!au.src&&D.words.length)$('msg').textContent='Now load the MP3.'};
+$('fT').onchange=e=>e.target.files[0]&&loadText(e.target.files[0]);$('fA').onchange=e=>e.target.files[0]&&loadAudio(e.target.files[0]);
+$('fB').onchange=e=>{const f=e.target.files[0];if(!f)return;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false;$('lbB').classList.add('ok')};
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(/\.(srt|json)$/i.test(f.name))loadText(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
+
+/* ---------- timeline ---------- */
+const X=t=>t*pps;
+const total=()=>Math.max(dur,(D.words.length?D.words.at(-1).e:0)+5,30);
+const inScene=(l,w)=>w.s>=l.start-1e-3&&w.s<l.end;
+function build(){D.lines=D.lines.filter(l=>D.words.some(w=>inScene(l,w))).sort((a,b)=>a.start-b.start);
+  if(sel&&sel.t==='l'&&!D.lines[sel.i])sel=null;inner.style.width=X(total())+'px';
+  $('tScenes').innerHTML='<span class="lab">Scenes</span>'+D.lines.map((l,i)=>{const t=wordsOf(i).map(w=>w.text).join(' ');return`<div class="clip l${sel&&sel.t==='l'&&sel.i===i?' sel':''}" data-t="l" data-i="${i}" style="left:${X(l.start)}px;width:${X(l.end-l.start)}px" title="${esc(t)}"><span class="e a"></span>${i+1}. ${esc(t)}<span class="e b"></span></div>`}).join('');
+  $('tWords').innerHTML='<span class="lab">Words</span>'+D.words.map((w,i)=>`<div class="clip w${w.pin?' pin':''}${lineOf(w)<0?' single':''}${selW.has(i)?' sel':''}" data-t="w" data-i="${i}" style="left:${X(w.s)}px;width:${Math.max(4,X(w.e-w.s))}px" title="${esc(w.text)} · ${(w.e-w.s).toFixed(2)} s"><span class="e a"></span>${esc(w.text)}<span class="e b"></span></div>`).join('');
+  drawWave();info();store()}
+function place(t,i){const o=t==='w'?D.words[i]:D.lines[i],n=document.querySelector(`.clip[data-t="${t}"][data-i="${i}"]`);if(!n)return;
+  const a=t==='w'?o.s:o.start,b=t==='w'?o.e:o.end;n.style.left=X(a)+'px';n.style.width=Math.max(4,X(b-a))+'px'}
+function drawWave(){const cv=$('wave'),W=tl.clientWidth,H=96,dpr=devicePixelRatio||1,sl=tl.scrollLeft;cv.style.left=sl+'px';cv.style.width=W+'px';cv.style.height=H+'px';
+  if(cv.width!==W*dpr){cv.width=W*dpr;cv.height=H*dpr}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+  c.fillStyle='#5b5b66';c.font='11px Inter Tight';const t0=sl/pps,t1=(sl+W)/pps,stepS=pps>=80?1:pps>=30?5:10;
+  for(let s=Math.ceil(t0/stepS)*stepS;s<t1;s+=stepS){const x=X(s)-sl;c.fillRect(x,0,1,8);c.fillText(fmt(s).replace(/\.00$/,''),x+3,10)}
+  if(pps>=150)for(let s=Math.ceil(t0*10)/10;s<t1;s+=.1){c.fillRect(X(s)-sl,0,1,4)}
+  if(peaks&&dur){c.fillStyle='#3d8f88';const per=peaks.length/dur,mid=58;for(let x=0;x<W;x++){const a=Math.floor((sl+x)/pps*per),b=Math.floor((sl+x+1)/pps*per);let m=0;for(let i=a;i<=b&&i<peaks.length;i++)if(peaks[i]>m)m=peaks[i];c.fillRect(x,mid-m*36,1,Math.max(1,m*72))}}}
+tl.addEventListener('scroll',drawWave);new ResizeObserver(drawWave).observe(tl);
+const zoomTo=(f,anchorX)=>{const ax=anchorX??tl.clientWidth/2,t=(tl.scrollLeft+ax)/pps;pps=Math.min(600,Math.max(15,pps*f));build();tl.scrollLeft=X(t)-ax};
+$('zi').onclick=()=>zoomTo(1.4);$('zo').onclick=()=>zoomTo(1/1.4);
+tl.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoomTo(e.deltaY<0?1.15:1/1.15,e.clientX-tl.getBoundingClientRect().left)}else if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){e.preventDefault();tl.scrollLeft+=e.deltaY}},{passive:false});
+$('rh').addEventListener('pointerdown',e=>{const seek=ev=>{au.currentTime=Math.max(0,(ev.clientX-tl.getBoundingClientRect().left+tl.scrollLeft)/pps)};seek(e);
+  const mv=ev=>seek(ev),up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};addEventListener('pointermove',mv);addEventListener('pointerup',up)});
+
+// Drag: body = move, edges = trim. Touching neighbours share the edge, so trimming one pushes the other.
+let drag=null;
+inner.addEventListener('pointerdown',e=>{const c=e.target.closest('.clip');if(!c||e.target.tagName==='INPUT')return;e.preventDefault();
+  const t=c.dataset.t,i=+c.dataset.i,mode=e.target.classList.contains('a')?'a':e.target.classList.contains('b')?'b':'m';
+  if(t==='w'&&(e.metaKey||e.ctrlKey)){selW.has(i)?selW.delete(i):selW.add(i);sel={t,i};markSel();return}
+  if(t==='w'&&e.shiftKey&&sel&&sel.t==='w'){const a=Math.min(sel.i,i),b=Math.max(sel.i,i);for(let k=a;k<=b;k++)selW.add(k);markSel();return}
+  if(t==='w'){if(!selW.has(i)||selW.size<2){selW.clear();selW.add(i)}}else selW.clear();sel={t,i};markSel();
+  if(t==='w'&&mode==='m'&&au.paused&&au.src)au.currentTime=Math.max(0,(e.clientX-tl.getBoundingClientRect().left+tl.scrollLeft)/pps);
+  if(t==='w'&&mode==='m'&&selW.size>1){snap();drag={group:groupCtx(),x0:e.clientX,moved:false};return}
+  const arr=t==='w'?D.words:D.lines,S=t==='w'?'s':'start',E=t==='w'?'e':'end',o=arr[i],prev=arr[i-1],next=arr[i+1];
+  drag={t,i,mode,x0:e.clientX,a0:o[S],b0:o[E],arr,S,E,prev,next,linkP:auto&&!!prev&&Math.abs(prev[E]-o[S])<.005,linkN:auto&&!!next&&Math.abs(next[S]-o[E])<.005,moved:false,rc:t==='w'?reflowCtx(i):null};snap()});
+addEventListener('pointermove',e=>{if(!drag)return;if(drag.group){if(Math.abs(e.clientX-drag.x0)>2)drag.moved=true;moveGroup(drag.group,(e.clientX-drag.x0)/pps);info();return}const d=drag,dt=(e.clientX-d.x0)/pps,o=d.arr[d.i],min=d.t==='w'?MINW:MINL,P=d.prev,N=d.next;if(Math.abs(e.clientX-d.x0)>2)d.moved=true;
+  if(d.rc&&auto&&!e.altKey){let s=d.a0,en=d.b0;if(d.mode==='m'){s+=dt;en+=dt;const sh=Math.max(0,d.rc.L-s)-Math.max(0,en-d.rc.R);s+=sh;en+=sh}else if(d.mode==='a')s+=dt;else en+=dt;
+    applyReflow(d.rc,s,en);info();if(d.mode==='a'&&au.paused)au.currentTime=o.s;return}
+  if(d.mode==='m'){const lo=P?P[d.E]:0,hi=N?N[d.S]:1e9,len=d.b0-d.a0;let a=Math.min(hi-len,Math.max(lo,d.a0+dt));o[d.S]=r3(a);o[d.E]=r3(a+len)}
+  else if(d.mode==='a'){const lo=d.linkP?P[d.S]+min:(P?P[d.E]:0);const a=r3(Math.min(o[d.E]-min,Math.max(lo,d.a0+dt)));o[d.S]=a;if(d.linkP){P[d.E]=a;place(d.t,d.i-1)}}
+  else{const hi=d.linkN?N[d.E]-min:(N?N[d.S]:1e9);const b=r3(Math.max(o[d.S]+min,Math.min(hi,d.b0+dt)));o[d.E]=b;if(d.linkN){N[d.S]=b;place(d.t,d.i+1)}}
+  place(d.t,d.i);info();
+  if(d.mode==='a'&&au.paused)au.currentTime=o[d.S]});
+addEventListener('pointerup',()=>{if(!drag)return;const d=drag;drag=null;if(!d.moved){undo.pop();return}if(d.group){build();return}if(d.t==='w')D.words[d.i].pin=true;build()});
+inner.addEventListener('dblclick',e=>{const c=e.target.closest('.clip');if(!c)return;const t=c.dataset.t,i=+c.dataset.i;
+  if(t==='l'){const s=D.lines[i];s.section=({verse:'list',list:'bridge',bridge:'affirm',affirm:'outro',outro:'verse'})[s.section];build();toast('Scene style: '+s.section);return}
+  const w=D.words[i],inp=document.createElement('input');inp.value=w.text;c.appendChild(inp);inp.focus();inp.select();
+  const done=ok=>{if(ok&&inp.value.trim()&&inp.value.trim()!==w.text){snap();w.text=inp.value.trim()}build()};
+  inp.onkeydown=ev=>{ev.stopPropagation();if(ev.key==='Enter')done(true);if(ev.key==='Escape')done(false)};inp.onblur=()=>done(true)});
+/* Reflow: editing word i stretches the un-pinned words between the nearest pinned word (or the scene edge)
+   and word i, keeping their relative lengths. Pinned words (edited by hand) never move. */
+function reflowCtx(i){const w=D.words[i],li=lineOf(w);if(li<0)return null;const sc=D.lines[li];
+  const orig=D.words.map(x=>({s:x.s,e:x.e}));let kp=i-1;while(kp>=0&&lineOf(D.words[kp])===li&&!D.words[kp].pin)kp--;
+  const leftIn=kp>=0&&lineOf(D.words[kp])===li;let jp=i+1;while(jp<D.words.length&&lineOf(D.words[jp])===li&&!D.words[jp].pin)jp++;
+  const rightIn=jp<D.words.length&&lineOf(D.words[jp])===li;
+  return{i,orig,L:leftIn?orig[kp].e:sc.start,R:rightIn?orig[jp].s:sc.end,a:kp+1,b:jp-1}}
+function applyReflow(c,s,e){const{i,orig,L,R,a,b}=c,o=orig[i],gap=.03;
+  s=Math.max(L+gap*(i-a),Math.min(s,e-MINW));e=Math.min(R-gap*(b-i),Math.max(e,s+MINW));
+  const mapL=t=>o.s>L?L+(t-L)*(s-L)/(o.s-L):L,mapR=t=>R>o.e?e+(t-o.e)*(R-e)/(R-o.e):e;
+  for(let k=a;k<i;k++){D.words[k].s=r3(mapL(orig[k].s));D.words[k].e=r3(mapL(orig[k].e));place('w',k)}
+  for(let k=i+1;k<=b;k++){D.words[k].s=r3(mapR(orig[k].s));D.words[k].e=r3(mapR(orig[k].e));place('w',k)}
+  D.words[i].s=r3(s);D.words[i].e=r3(e);place('w',i)}
+/* Moving several selected words together. With Auto-align on, the unselected neighbour on each side
+   follows: the gap left behind is filled, the word moved into is shortened. */
+function groupCtx(){const idx=[...selW].sort((a,b)=>a-b),blocks=[];idx.forEach(i=>{const b=blocks.at(-1);b&&b[1]===i-1?b[1]=i:blocks.push([i,i])});
+  return{idx,blocks,orig:D.words.map(w=>({s:w.s,e:w.e}))}}
+function moveGroup(c,dt){const{blocks,orig}=c,W=D.words;let lo=-1e9,hi=1e9;
+  blocks.forEach(([a,b])=>{const P=orig[a-1],N=orig[b+1];
+    if(auto){lo=Math.max(lo,(P?P.s+MINW:0)-orig[a].s);hi=Math.min(hi,(N?N.e-MINW:1e9)-orig[b].e)}
+    else{lo=Math.max(lo,(P?P.e:0)-orig[a].s);hi=Math.min(hi,(N?N.s:1e9)-orig[b].e)}});
+  dt=Math.min(hi,Math.max(lo,dt));const touched=new Set();
+  blocks.forEach(([a,b])=>{for(let k=a;k<=b;k++){W[k].s=r3(orig[k].s+dt);W[k].e=r3(orig[k].e+dt);touched.add(k)}
+    if(auto&&a>0){const P=orig[a-1],ns=W[a].s;W[a-1].e=r3(Math.abs(P.e-orig[a].s)<.005?ns:Math.min(P.e,ns));touched.add(a-1)}
+    if(auto&&b<W.length-1){const N=orig[b+1],ne=W[b].e;W[b+1].s=r3(Math.abs(N.s-orig[b].e)<.005?ne:Math.max(N.s,ne));touched.add(b+1)}});
+  touched.forEach(k=>place('w',k))}
+function cut(side){if(!sel||sel.t!=='w')return toast('Select a word first');const i=sel.i,w=D.words[i],t=r3(au.currentTime);
+  if(t<=w.s+.01||t>=w.e-.01)return toast('Put the playhead inside the selected word (click on it)');snap();
+  if(side==='L'){const cutLen=t-w.s;if(auto&&i>0)D.words[i-1].e=r3(D.words[i-1].e+cutLen);w.s=t}
+  else if(side==='R'){const cutLen=w.e-t;if(auto&&i<D.words.length-1)D.words[i+1].s=r3(D.words[i+1].s-cutLen);w.e=t}
+  else{const parts=w.text.split(/\s+/);let a=w.text,b=w.text;if(parts.length>1){const h=Math.ceil(parts.length/2);a=parts.slice(0,h).join(' ');b=parts.slice(h).join(' ')}
+    D.words.splice(i+1,0,{text:b,s:t,e:w.e});w.e=t;w.text=a;selW=new Set([i+1]);sel={t:'w',i:i+1};if(parts.length<2)toast('Split — double-click a part to rename it')}
+  w.pin=true;build()}
+$('bDL').onclick=()=>cut('L');$('bDR').onclick=()=>cut('R');$('bSp').onclick=()=>cut('S');
+$('bAuto').onclick=()=>{auto=!auto;$('bAuto').classList.toggle('on',auto);toast('Auto-align '+(auto?'on':'off'))};
+function markSel(){document.querySelectorAll('.clip.sel').forEach(n=>n.classList.remove('sel'));selW.forEach(i=>{const n=document.querySelector(`.clip.w[data-i="${i}"]`);n&&n.classList.add('sel')});
+  if(sel&&sel.t==='l'){const n=document.querySelector(`.clip.l[data-i="${sel.i}"]`);n&&n.classList.add('sel')}info()}
+function group(){if(!selW.size)return toast('Select words first (click, ⇧-click, ⌘-click)');snap();
+  const ws=[...selW].map(i=>D.words[i]),s=r3(Math.min(...ws.map(w=>w.s))),e=r3(Math.max(...ws.map(w=>w.e)));const out=[];
+  D.lines.forEach(l=>{if(l.end<=s||l.start>=e){out.push(l);return}if(l.start<s)out.push({...l,end:s});if(l.end>e)out.push({...l,start:e})});
+  out.push({section:'verse',start:s,end:e});D.lines=out;selW.clear();build();sel={t:'l',i:D.lines.findIndex(l=>l.start===s&&l.end===e)};markSel();toast('Scene created — double-click it to change its style')}
+function ungroup(){if(!sel||sel.t!=='l')return;snap();D.lines.splice(sel.i,1);sel=null;build();toast('Scene removed — its words now show one by one')}
+$('tScenes').addEventListener('dblclick',e=>{if(e.target.closest('.clip'))return;const t=(e.clientX-tl.getBoundingClientRect().left+tl.scrollLeft)/pps;
+  const prevEnd=Math.max(0,...D.lines.filter(l=>l.end<=t).map(l=>l.end)),nextStart=Math.min(1e9,...D.lines.filter(l=>l.start>=t).map(l=>l.start));
+  const ws=D.words.map((w,i)=>[w,i]).filter(([w])=>w.s>=prevEnd&&w.s<nextStart&&lineOf(w)<0);if(!ws.length)return toast('No single words here to put in a scene');
+  selW=new Set(ws.map(x=>x[1]));group()});
+function info(){const el=$('selInfo');if(selW.size>1){el.innerHTML=`<b>${selW.size} words selected</b> — press ⌘G to make them a scene`;return}if(!sel){el.innerHTML='<b>Nothing selected</b> — click a clip';return}
+  if(sel.t==='w'){const w=D.words[sel.i];el.innerHTML=`<b>${esc(w.text)}</b> ${fmt(w.s)} → ${fmt(w.e)} · ${(w.e-w.s).toFixed(2)} s${lineOf(w)<0?' · shown on its own':' · in scene '+(lineOf(w)+1)}`}
+  else{const l=D.lines[sel.i];el.innerHTML=`<b>Scene ${sel.i+1}</b> (${esc(l.section)} — double-click to change style) ${fmt(l.start)} → ${fmt(l.end)}`}}
+
+/* ---------- transport + keys ---------- */
+const playPause=()=>{if(!au.src)return toast('Load the MP3 first');au.paused?au.play().catch(()=>{}):au.pause()};
+$('play').onclick=playPause;au.onplay=au.onpause=()=>$('play').textContent=au.paused?'Play':'Pause';
+$('rate').onchange=e=>au.playbackRate=+e.target.value;
+const doUndo=()=>{const u=undo.pop();if(!u)return toast('Nothing to undo');D=JSON.parse(u);sel=null;selW.clear();build()};$('undo').onclick=doUndo;
+addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;const k=e.key;
+  if(k===' '){e.preventDefault();playPause()}
+  else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='z'){e.preventDefault();doUndo()}
+  else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='g'){e.preventDefault();e.shiftKey?ungroup():group()}
+  else if(sel&&sel.t==='l'&&(k==='Delete'||k==='Backspace')){e.preventDefault();ungroup()}
+  else if(k==='Escape'){selW.clear();sel=null;markSel()}
+  else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='b'){e.preventDefault();cut('S')}
+  else if(!e.ctrlKey&&!e.metaKey&&(k==='q'||k==='Q'))cut('L');else if(!e.ctrlKey&&!e.metaKey&&(k==='w'||k==='W'))cut('R');
+  else if(selW.size&&(k===','||k==='.'||k==='<'||k==='>')){snap();moveGroup(groupCtx(),(k===','||k==='<'?-1:1)*(e.shiftKey?.01:.05));build()}
+  else if(k==='+'||k==='=')zoomTo(1.4);else if(k==='-')zoomTo(1/1.4);
+  else if(sel&&sel.t==='w'&&(k==='['||k===']')&&!auto){const w=D.words[sel.i],t=r3(au.currentTime);snap();if(k==='['&&t<w.e)w.s=t;if(k===']'&&t>w.s)w.e=t;build()}
+  else if(sel&&sel.t==='w'&&(k==='['||k===']')){const w=D.words[sel.i],c=reflowCtx(sel.i),t=r3(au.currentTime);if(!c)return;snap();
+    if(k==='[')applyReflow(c,t,Math.max(w.e,t+MINW));else applyReflow(c,Math.min(w.s,t-MINW),t);w.pin=true;build()}
+  else if(sel&&sel.t==='w'&&(k==='p'||k==='P')){snap();D.words[sel.i].pin=!D.words[sel.i].pin;build();toast(D.words[sel.i].pin?'Pinned':'Unpinned')}
+  else if(sel&&(k==='['||k===']')){const arr=sel.t==='w'?D.words:D.lines,S=sel.t==='w'?'s':'start',E=sel.t==='w'?'e':'end',o=arr[sel.i],t=r3(au.currentTime);snap();
+    if(k==='['){const P=arr[sel.i-1];if(t<o[E]){if(P&&P[E]>t)P[E]=Math.max(P[S]+.02,t);o[S]=t}}else{const N=arr[sel.i+1];if(t>o[S]){if(N&&N[S]<t)N[S]=Math.min(N[E]-.02,t);o[E]=t}}build()}
+  else if(sel&&(k==='Delete'||k==='Backspace')&&sel.t==='w'){e.preventDefault();snap();const del=selW.size?[...selW]:[sel.i];D.words=D.words.filter((_,i)=>!del.includes(i));sel=null;selW.clear();build()}
+  else if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();au.currentTime=Math.max(0,au.currentTime+(k==='ArrowLeft'?-1:1)*(e.shiftKey?.1:1))}});
+
+/* ---------- save ---------- */
+let dl=null;(async()=>{try{dl=window.claude&&await window.claude.use('downloads')}catch(e){}})();
+async function saveFile(fn,data,type){if(!D.words.length)return toast('Load an SRT first');
+  if(dl){try{await dl.save({filename:fn,data});toast('Saved '+fn)}catch(e){toast('Save was declined')}return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=fn;a.click()}
+$('sJ').onclick=()=>saveFile((name||'lyrics')+'.words.json',JSON.stringify(toJson(),null,1),'application/json');
+$('sS').onclick=()=>saveFile((name||'lyrics')+'.synced.srt',toSrt(),'text/plain');
+
+/* ---------- loop ---------- */
+let litIdx=-1;
+(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';drawStage(t);
+  let li=-1;for(let i=0;i<D.words.length;i++){if(t>=D.words[i].s&&t<D.words[i].e){li=i;break}}
+  if(li!==litIdx){document.querySelectorAll('.clip.lit').forEach(n=>n.classList.remove('lit'));const n=document.querySelector(`.clip.w[data-i="${li}"]`);n&&n.classList.add('lit');litIdx=li}
+  if(!au.paused&&!drag){const x=X(t)-tl.scrollLeft;if(x>tl.clientWidth*.8||x<0)tl.scrollLeft=X(t)-tl.clientWidth*.2}
+  requestAnimationFrame(loop)})();
+build();
+}
+</script>
+</body>
+</html>
