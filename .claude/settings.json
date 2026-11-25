@@ -1,14 +1,10 @@
 {
   "hooks": {
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/autopush.sh" }] }
+    ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git add -A && (git diff --cached --quiet || git commit -q -m \"Auto-commit: $(date '+%Y-%m-%d %H:%M')\") && git push -q origin main 2>&1 | tail -2; true"
-          }
-        ]
-      }
+      { "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/autopush.sh" }] }
     ]
   }
 }
