@@ -18,6 +18,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Inter Tight",
 button,.fb,select{font:inherit;color:inherit;min-height:36px;padding:0 12px;border-radius:7px;border:1px solid var(--line);background:var(--pan);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px solid var(--wordb);outline-offset:1px}
 .fb input{display:none}.fb.ok{border-color:var(--wordb);color:var(--wordb)}
+#ai{border-color:var(--wordb);color:var(--wordb);font-weight:600}#ai:disabled{opacity:.6;cursor:wait}
 #play{background:var(--ink);color:#000;border-color:var(--ink);min-width:80px;justify-content:center;font-weight:600}
 .bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
 .clock{font-variant-numeric:tabular-nums;font-size:16px;margin:0 8px;min-width:150px}
@@ -63,6 +64,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   <label class="fb" id="lbB">Background<input id="fB" type="file" accept="image/*"></label>
   <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
   <select id="rate" aria-label="Speed"><option value="1">1×</option><option value="0.75">0.75×</option><option value="0.5">0.5×</option></select>
+  <button id="ai" title="Time every word automatically from the MP3">Fit with AI</button>
   <span class="sp"></span>
   <button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button>
   <button id="undo">Undo</button><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
@@ -90,7 +92,7 @@ const fmt=t=>{t=Math.max(0,t||0);const m=Math.floor(t/60);return m+':'+(t-m*60).
 const toast=m=>{const e=$('toast');e.textContent=m;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1800)};
 const r3=x=>Math.round(x*1000)/1000,MINW=.04,MINL=.2;
 const au=$('au'),tl=$('tl'),inner=$('inner');
-let auto=true,pps=110,dur=0,peaks=null,sel=null,selW=new Set(),undo=[],name='';
+let audioFile=null,auto=true,pps=110,dur=0,peaks=null,sel=null,selW=new Set(),undo=[],name='';
 // D.lines: [{section,start,end}] scenes; D.words: [{text,s,e}] sorted. A word belongs to the scene containing its start;
 // a word outside every scene is shown on its own (word-by-word).
 let D={artist:'',title:'',lines:[],words:[]};
@@ -148,7 +150,7 @@ async function loadText(f){const txt=await f.text();name=f.name.replace(/(\.word
     if(sv&&sv.words&&sv.words.length){D=sv;toast('Your earlier edits were restored')}
     else if(old&&old.words&&old.words.length){D={...old,lines:[]};toast('Your earlier word timings were restored (scenes cleared)')}}
   undo=[];sel=null;selW.clear();$('lbT').classList.add('ok');ready();build()}
-async function loadAudio(f){au.src=URL.createObjectURL(f);$('lbA').classList.add('ok');ready();
+async function loadAudio(f){audioFile=f;au.src=URL.createObjectURL(f);$('lbA').classList.add('ok');ready();
   try{const ac=new AudioContext();const buf=await ac.decodeAudioData(await f.arrayBuffer());dur=buf.duration;const ch=buf.getChannelData(0),per=Math.floor(buf.sampleRate/200),n=Math.floor(ch.length/per);
     peaks=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*per;j<(i+1)*per;j+=3){const v=Math.abs(ch[j]);if(v>m)m=v}peaks[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)peaks[i]/=mx||1;ac.close();build()}catch(e){toast('Could not draw the waveform for this file')}}
 const ready=()=>{$('msg').hidden=!!(au.src&&D.words.length);if(!au.src&&D.words.length)$('msg').textContent='Now load the MP3.'};
@@ -280,6 +282,50 @@ addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;const 
     if(k==='['){const P=arr[sel.i-1];if(t<o[E]){if(P&&P[E]>t)P[E]=Math.max(P[S]+.02,t);o[S]=t}}else{const N=arr[sel.i+1];if(t>o[S]){if(N&&N[S]<t)N[S]=Math.min(N[E]-.02,t);o[E]=t}}build()}
   else if(sel&&(k==='Delete'||k==='Backspace')&&sel.t==='w'){e.preventDefault();snap();const del=selW.size?[...selW]:[sel.i];D.words=D.words.filter((_,i)=>!del.includes(i));sel=null;selW.clear();build()}
   else if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();au.currentTime=Math.max(0,au.currentTime+(k==='ArrowLeft'?-1:1)*(e.shiftKey?.1:1))}});
+
+/* ---------- fit with AI ---------- */
+// Vercel rejects requests over 4.5 MB, so bigger files are re-encoded to a mono 64 kbps MP3 first.
+const MAXUP=4.2e6;
+async function shrink(f){
+  if(!window.lamejs)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js';sc.onload=ok;sc.onerror=()=>no(Error('Could not load the MP3 compressor'));document.head.appendChild(sc)});
+  const R=22050,ac=new AudioContext(),buf=await ac.decodeAudioData(await f.arrayBuffer());ac.close();
+  const off=new OfflineAudioContext(1,Math.ceil(buf.duration*R),R),src=off.createBufferSource();src.buffer=buf;src.connect(off.destination);src.start();
+  const pcm=(await off.startRendering()).getChannelData(0),int=Int16Array.from(pcm,v=>Math.max(-1,Math.min(1,v))*32767);
+  const enc=new lamejs.Mp3Encoder(1,R,64),out=[];
+  for(let i=0;i<int.length;i+=1152)out.push(enc.encodeBuffer(int.subarray(i,i+1152)));
+  out.push(enc.flush());
+  const small=new File(out,'audio.mp3',{type:'audio/mpeg'});
+  if(small.size>MAXUP)throw Error('This song is too long to upload');
+  return small}
+// Writes the model's timings into D. Pinned (hand-edited) words stay put; scenes move with their words.
+function applyTimes(times){const W=D.words,scenes=D.lines.map((l,li)=>{const ws=wordsOf(li);return{l,ws,lead:ws.length?Math.max(0,ws[0].s-l.start):0,tail:ws.length?Math.max(0,l.end-ws.at(-1).e):0}});
+  W.forEach((w,i)=>{if(!w.pin){w.s=times[i].s;w.e=Math.max(times[i].e,times[i].s+MINW)}});
+  // no overlaps: first make room before each pinned word, then push later words forward
+  for(let i=W.length-2;i>=0;i--){const w=W[i],n=W[i+1];if(!w.pin&&w.e>n.s){w.e=Math.max(n.s,MINW);w.s=Math.max(0,Math.min(w.s,w.e-MINW))}}
+  for(let i=1;i<W.length;i++){const w=W[i],p=W[i-1];if(!w.pin&&w.s<p.e){w.s=p.e;w.e=Math.max(w.e,w.s+MINW)}}
+  W.forEach(w=>{w.s=r3(w.s);w.e=r3(w.e)});
+  scenes.forEach(({l,ws,lead,tail})=>{if(ws.length){l.start=r3(Math.max(0,ws[0].s-lead));l.end=r3(ws.at(-1).e+tail)}});
+  D.lines.sort((a,b)=>a.start-b.start);
+  scenes.sort((a,b)=>a.l.start-b.l.start).forEach(({l,ws},i,all)=>{const n=all[i+1];if(n&&ws.length&&n.ws.length&&l.end>n.l.start){const cut=n.ws[0].s;n.l.start=r3(Math.min(cut,Math.max(n.l.start,ws.at(-1).e)));l.end=n.l.start}})}
+async function fitAI(){
+  if(!D.words.length||!audioFile)return toast('Load the SRT and the MP3 first');
+  const btn=$('ai'),file=audioFile,texts=()=>JSON.stringify(D.words.map(w=>w.text)),sent=texts(),words=D.words.map(w=>w.text.trim().split(/\s+/));
+  btn.disabled=true;btn.textContent='Fitting…';
+  try{const body=new FormData();body.append('file',file.size>MAXUP?await shrink(file):file);body.append('text',words.map(p=>p.join(' ')).join(' '));
+    const res=await fetch('/api/align',{method:'POST',body});
+    const j=await res.json().catch(()=>null);
+    if(res.status===401)throw Error('Your sign-in expired. Reload the page and sign in again.');
+    if(!res.ok||!j)throw Error(j&&j.error||'Server error '+res.status);
+    const got=j.words.filter(w=>w.text.trim());
+    if(got.length!==words.reduce((n,p)=>n+p.length,0))throw Error('The AI returned a different number of words, nothing was changed');
+    if(file!==audioFile||sent!==texts())throw Error('The song or lyrics changed while fitting, nothing was changed');
+    let k=0;const times=words.map(p=>{const part=got.slice(k,k+=p.length);return{s:part[0].start,e:part.at(-1).end}});
+    const kept=D.words.filter(w=>w.pin).length;
+    snap();applyTimes(times);sel=null;selW.clear();build();
+    toast(kept?`Fitted. ${kept} hand-edited words kept (Undo to revert)`:'Fitted. Undo to revert')}
+  catch(e){alert('Fit with AI failed: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Fit with AI'}}
+$('ai').onclick=fitAI;
 
 /* ---------- save ---------- */
 let dl=null;(async()=>{try{dl=window.claude&&await window.claude.use('downloads')}catch(e){}})();
