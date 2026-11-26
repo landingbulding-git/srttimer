@@ -1,0 +1,7 @@
+# local song files and secrets
+*.mp3
+*.wav
+*.srt
+*.words.json
+*.response.json
+.env
