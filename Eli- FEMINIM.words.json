@@ -1,0 +1,2176 @@
+{
+ "version": 4,
+ "artist": "",
+ "title": "",
+ "fps": 30,
+ "lines": [
+  {
+   "section": "single",
+   "start": 16.254,
+   "end": 17.222,
+   "words": [
+    {
+     "text": "Szembe",
+     "start": 16.254,
+     "end": 17.222
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 17.222,
+   "end": 17.703,
+   "words": [
+    {
+     "text": "jön",
+     "start": 17.222,
+     "end": 17.703
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 17.703,
+   "end": 18.952,
+   "words": [
+    {
+     "text": "velem,",
+     "start": 17.703,
+     "end": 18.952
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 18.952,
+   "end": 19.688,
+   "words": [
+    {
+     "text": "azt",
+     "start": 18.952,
+     "end": 19.688
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 19.688,
+   "end": 20.91,
+   "words": [
+    {
+     "text": "hiszi,",
+     "start": 19.688,
+     "end": 20.91
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 20.91,
+   "end": 21.452,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 20.91,
+     "end": 21.452
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 21.452,
+   "end": 22.96,
+   "words": [
+    {
+     "text": "ismer.",
+     "start": 21.452,
+     "end": 22.96
+    }
+   ]
+  },
+  {
+   "section": "verse",
+   "start": 23.177,
+   "end": 30.262,
+   "words": [
+    {
+     "text": "Végignéz",
+     "start": 23.186,
+     "end": 24.983
+    },
+    {
+     "text": "rajtam,",
+     "start": 24.983,
+     "end": 26.518
+    },
+    {
+     "text": "a",
+     "start": 26.518,
+     "end": 27.029
+    },
+    {
+     "text": "száját",
+     "start": 27.029,
+     "end": 28.086
+    },
+    {
+     "text": "harapja.",
+     "start": 28.086,
+     "end": 30.098
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 31.83,
+   "end": 33.763,
+   "words": [
+    {
+     "text": "Olyan,",
+     "start": 31.83,
+     "end": 33.763
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 33.763,
+   "end": 34.257,
+   "words": [
+    {
+     "text": "mintha",
+     "start": 33.763,
+     "end": 34.257
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 34.257,
+   "end": 34.586,
+   "words": [
+    {
+     "text": "egy",
+     "start": 34.257,
+     "end": 34.586
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 34.586,
+   "end": 35.505,
+   "words": [
+    {
+     "text": "darab",
+     "start": 34.586,
+     "end": 35.505
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 35.505,
+   "end": 36.423,
+   "words": [
+    {
+     "text": "húsra",
+     "start": 35.505,
+     "end": 36.423
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 36.423,
+   "end": 37.867,
+   "words": [
+    {
+     "text": "vadászna,",
+     "start": 36.423,
+     "end": 37.867
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 37.867,
+   "end": 38.523,
+   "words": [
+    {
+     "text": "Nem",
+     "start": 37.867,
+     "end": 38.523
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 38.523,
+   "end": 39.048,
+   "words": [
+    {
+     "text": "is",
+     "start": 38.523,
+     "end": 39.048
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 39.85,
+   "end": 41.496,
+   "words": [
+    {
+     "text": "értem,",
+     "start": 39.85,
+     "end": 41.496
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 41.496,
+   "end": 42.73,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 41.496,
+     "end": 42.73
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 42.73,
+   "end": 44.17,
+   "words": [
+    {
+     "text": "miért",
+     "start": 42.73,
+     "end": 44.17
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 44.17,
+   "end": 45.61,
+   "words": [
+    {
+     "text": "kéne.",
+     "start": 44.17,
+     "end": 45.61
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 46.25,
+   "end": 46.787,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 46.25,
+     "end": 46.787
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 46.787,
+   "end": 48.041,
+   "words": [
+    {
+     "text": "megengedjem,",
+     "start": 46.787,
+     "end": 48.041
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 48.041,
+   "end": 48.578,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 48.041,
+     "end": 48.578
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 48.578,
+   "end": 49.832,
+   "words": [
+    {
+     "text": "megérintsen,",
+     "start": 48.578,
+     "end": 49.832
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 49.832,
+   "end": 50.369,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 49.832,
+     "end": 50.369
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 50.369,
+   "end": 51.623,
+   "words": [
+    {
+     "text": "megismerjen,",
+     "start": 50.369,
+     "end": 51.623
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 51.623,
+   "end": 52.16,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 51.623,
+     "end": 52.16
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 52.16,
+   "end": 53.414,
+   "words": [
+    {
+     "text": "megragadjon,",
+     "start": 52.16,
+     "end": 53.414
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 54.47,
+   "end": 55.062,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 54.47,
+     "end": 55.062
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 55.062,
+   "end": 56.343,
+   "words": [
+    {
+     "text": "elragadjon,",
+     "start": 55.062,
+     "end": 56.343
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 56.343,
+   "end": 56.935,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 56.343,
+     "end": 56.935
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 56.935,
+   "end": 58.217,
+   "words": [
+    {
+     "text": "eltaposson,",
+     "start": 56.935,
+     "end": 58.217
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 58.217,
+   "end": 58.808,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 58.217,
+     "end": 58.808
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 58.808,
+   "end": 59.696,
+   "words": [
+    {
+     "text": "ellopja",
+     "start": 58.808,
+     "end": 59.696
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 59.696,
+   "end": 59.991,
+   "words": [
+    {
+     "text": "a",
+     "start": 59.696,
+     "end": 59.991
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 59.991,
+   "end": 61.076,
+   "words": [
+    {
+     "text": "fényemet,",
+     "start": 59.991,
+     "end": 61.076
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 61.97,
+   "end": 62.436,
+   "words": [
+    {
+     "text": "és",
+     "start": 61.97,
+     "end": 62.436
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 62.436,
+   "end": 63.484,
+   "words": [
+    {
+     "text": "elvegye",
+     "start": 62.436,
+     "end": 63.484
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 63.484,
+   "end": 63.834,
+   "words": [
+    {
+     "text": "a",
+     "start": 63.484,
+     "end": 63.834
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 63.834,
+   "end": 65.115,
+   "words": [
+    {
+     "text": "lelkemet,",
+     "start": 63.834,
+     "end": 65.115
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 65.115,
+   "end": 65.581,
+   "words": [
+    {
+     "text": "És",
+     "start": 65.115,
+     "end": 65.581
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 65.581,
+   "end": 66.863,
+   "words": [
+    {
+     "text": "megtegye,",
+     "start": 65.581,
+     "end": 66.863
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 66.863,
+   "end": 67.562,
+   "words": [
+    {
+     "text": "amit",
+     "start": 66.863,
+     "end": 67.562
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 67.562,
+   "end": 68.144,
+   "words": [
+    {
+     "text": "nem",
+     "start": 67.562,
+     "end": 68.144
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 68.83,
+   "end": 70.218,
+   "words": [
+    {
+     "text": "tehet,",
+     "start": 68.83,
+     "end": 70.218
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 70.218,
+   "end": 71.259,
+   "words": [
+    {
+     "text": "Csak",
+     "start": 70.218,
+     "end": 71.259
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 71.259,
+   "end": 72.647,
+   "words": [
+    {
+     "text": "azért,",
+     "start": 71.259,
+     "end": 72.647
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 72.647,
+   "end": 73.689,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 72.647,
+     "end": 73.689
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 73.689,
+   "end": 74.383,
+   "words": [
+    {
+     "text": "ne",
+     "start": 73.689,
+     "end": 74.383
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 74.383,
+   "end": 75.771,
+   "words": [
+    {
+     "text": "legyek",
+     "start": 74.383,
+     "end": 75.771
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 75.771,
+   "end": 77.506,
+   "words": [
+    {
+     "text": "egyedül.",
+     "start": 75.771,
+     "end": 77.506
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 78.47,
+   "end": 79.667,
+   "words": [
+    {
+     "text": "Szembe",
+     "start": 78.47,
+     "end": 79.667
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 79.667,
+   "end": 80.415,
+   "words": [
+    {
+     "text": "jön",
+     "start": 79.667,
+     "end": 80.415
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 80.415,
+   "end": 81.611,
+   "words": [
+    {
+     "text": "velem,",
+     "start": 80.415,
+     "end": 81.611
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 81.611,
+   "end": 82.359,
+   "words": [
+    {
+     "text": "azt",
+     "start": 81.611,
+     "end": 82.359
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 82.359,
+   "end": 83.556,
+   "words": [
+    {
+     "text": "hiszi,",
+     "start": 82.359,
+     "end": 83.556
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 83.556,
+   "end": 84.453,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 83.556,
+     "end": 84.453
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 84.453,
+   "end": 85.65,
+   "words": [
+    {
+     "text": "ismer.",
+     "start": 84.453,
+     "end": 85.65
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 85.65,
+   "end": 87.146,
+   "words": [
+    {
+     "text": "végignéz",
+     "start": 85.65,
+     "end": 87.146
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 88.11,
+   "end": 89.476,
+   "words": [
+    {
+     "text": "rajtam",
+     "start": 88.11,
+     "end": 89.476
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 89.476,
+   "end": 89.988,
+   "words": [
+    {
+     "text": "a",
+     "start": 89.476,
+     "end": 89.988
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 89.988,
+   "end": 91.353,
+   "words": [
+    {
+     "text": "száját",
+     "start": 89.988,
+     "end": 91.353
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 91.353,
+   "end": 93.06,
+   "words": [
+    {
+     "text": "harapja.",
+     "start": 91.353,
+     "end": 93.06
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 94.61,
+   "end": 95.686,
+   "words": [
+    {
+     "text": "Olyan,",
+     "start": 94.61,
+     "end": 95.686
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 95.686,
+   "end": 96.762,
+   "words": [
+    {
+     "text": "mintha",
+     "start": 95.686,
+     "end": 96.762
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 96.762,
+   "end": 97.435,
+   "words": [
+    {
+     "text": "egy",
+     "start": 96.762,
+     "end": 97.435
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 97.435,
+   "end": 98.376,
+   "words": [
+    {
+     "text": "darab",
+     "start": 97.435,
+     "end": 98.376
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 98.376,
+   "end": 99.318,
+   "words": [
+    {
+     "text": "húsra",
+     "start": 98.376,
+     "end": 99.318
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 99.318,
+   "end": 100.797,
+   "words": [
+    {
+     "text": "vadászna,",
+     "start": 99.318,
+     "end": 100.797
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 100.797,
+   "end": 101.47,
+   "words": [
+    {
+     "text": "Nem",
+     "start": 100.797,
+     "end": 101.47
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 101.47,
+   "end": 102.008,
+   "words": [
+    {
+     "text": "is",
+     "start": 101.47,
+     "end": 102.008
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 102.83,
+   "end": 104.316,
+   "words": [
+    {
+     "text": "értem,",
+     "start": 102.83,
+     "end": 104.316
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 104.316,
+   "end": 105.431,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 104.316,
+     "end": 105.431
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 105.431,
+   "end": 106.732,
+   "words": [
+    {
+     "text": "miért",
+     "start": 105.431,
+     "end": 106.732
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 106.732,
+   "end": 108.032,
+   "words": [
+    {
+     "text": "kéne.",
+     "start": 106.732,
+     "end": 108.032
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 108.61,
+   "end": 109.359,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 108.61,
+     "end": 109.359
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 109.359,
+   "end": 110.856,
+   "words": [
+    {
+     "text": "elhiggyem,",
+     "start": 109.359,
+     "end": 110.856
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 110.856,
+   "end": 111.605,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 110.856,
+     "end": 111.605
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 111.605,
+   "end": 112.229,
+   "words": [
+    {
+     "text": "nem",
+     "start": 111.605,
+     "end": 112.229
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 112.229,
+   "end": 113.102,
+   "words": [
+    {
+     "text": "lehet",
+     "start": 112.229,
+     "end": 113.102
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 113.102,
+   "end": 114.225,
+   "words": [
+    {
+     "text": "egyedül",
+     "start": 113.102,
+     "end": 114.225
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 114.225,
+   "end": 114.724,
+   "words": [
+    {
+     "text": "is",
+     "start": 114.225,
+     "end": 114.724
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 114.724,
+   "end": 115.972,
+   "words": [
+    {
+     "text": "élveznem",
+     "start": 114.724,
+     "end": 115.972
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 116.79,
+   "end": 117.123,
+   "words": [
+    {
+     "text": "a",
+     "start": 116.79,
+     "end": 117.123
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 117.123,
+   "end": 118.677,
+   "words": [
+    {
+     "text": "naplementét,",
+     "start": 117.123,
+     "end": 118.677
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 118.677,
+   "end": 119.01,
+   "words": [
+    {
+     "text": "a",
+     "start": 118.677,
+     "end": 119.01
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 119.01,
+   "end": 119.565,
+   "words": [
+    {
+     "text": "hűs",
+     "start": 119.01,
+     "end": 119.565
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 119.565,
+   "end": 120.675,
+   "words": [
+    {
+     "text": "szellőt,",
+     "start": 119.565,
+     "end": 120.675
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 120.675,
+   "end": 121.452,
+   "words": [
+    {
+     "text": "Ahogy",
+     "start": 120.675,
+     "end": 121.452
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 121.452,
+   "end": 122.451,
+   "words": [
+    {
+     "text": "átsuhan",
+     "start": 121.452,
+     "end": 122.451
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 122.451,
+   "end": 122.784,
+   "words": [
+    {
+     "text": "a",
+     "start": 122.451,
+     "end": 122.784
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 123.45,
+   "end": 124.748,
+   "words": [
+    {
+     "text": "szívemen,",
+     "start": 123.45,
+     "end": 124.748
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 124.748,
+   "end": 125.102,
+   "words": [
+    {
+     "text": "a",
+     "start": 124.748,
+     "end": 125.102
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 125.102,
+   "end": 126.399,
+   "words": [
+    {
+     "text": "lelkemen,",
+     "start": 125.102,
+     "end": 126.399
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 126.399,
+   "end": 126.753,
+   "words": [
+    {
+     "text": "a",
+     "start": 126.399,
+     "end": 126.753
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 126.753,
+   "end": 128.051,
+   "words": [
+    {
+     "text": "testemen,",
+     "start": 126.753,
+     "end": 128.051
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 128.051,
+   "end": 128.522,
+   "words": [
+    {
+     "text": "És",
+     "start": 128.051,
+     "end": 128.522
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 128.522,
+   "end": 129.348,
+   "words": [
+    {
+     "text": "egyre",
+     "start": 128.522,
+     "end": 129.348
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 129.348,
+   "end": 130.056,
+   "words": [
+    {
+     "text": "csak",
+     "start": 129.348,
+     "end": 130.056
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 130.79,
+   "end": 132.875,
+   "words": [
+    {
+     "text": "szaladok",
+     "start": 130.79,
+     "end": 132.875
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 132.875,
+   "end": 135.168,
+   "words": [
+    {
+     "text": "szabadon,",
+     "start": 132.875,
+     "end": 135.168
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 135.168,
+   "end": 136.21,
+   "words": [
+    {
+     "text": "Egy",
+     "start": 135.168,
+     "end": 136.21
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 136.21,
+   "end": 138.086,
+   "words": [
+    {
+     "text": "virágos",
+     "start": 136.21,
+     "end": 138.086
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 138.086,
+   "end": 139.754,
+   "words": [
+    {
+     "text": "réten.",
+     "start": 138.086,
+     "end": 139.754
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 140.75,
+   "end": 143.009,
+   "words": [
+    {
+     "text": "Nincs",
+     "start": 140.75,
+     "end": 143.009
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 143.009,
+   "end": 145.268,
+   "words": [
+    {
+     "text": "mitől",
+     "start": 143.009,
+     "end": 145.268
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 145.268,
+   "end": 148.172,
+   "words": [
+    {
+     "text": "félnem,",
+     "start": 145.268,
+     "end": 148.172
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 148.172,
+   "end": 149.786,
+   "words": [
+    {
+     "text": "Van",
+     "start": 148.172,
+     "end": 149.786
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 150.79,
+   "end": 152.973,
+   "words": [
+    {
+     "text": "kiért",
+     "start": 150.79,
+     "end": 152.973
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 152.973,
+   "end": 155.467,
+   "words": [
+    {
+     "text": "élnem,",
+     "start": 152.973,
+     "end": 155.467
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 155.467,
+   "end": 157.026,
+   "words": [
+    {
+     "text": "Nem",
+     "start": 155.467,
+     "end": 157.026
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 157.026,
+   "end": 159.52,
+   "words": [
+    {
+     "text": "vagyok",
+     "start": 157.026,
+     "end": 159.52
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 160.49,
+   "end": 163.239,
+   "words": [
+    {
+     "text": "tulajdon,",
+     "start": 160.49,
+     "end": 163.239
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 163.239,
+   "end": 164.489,
+   "words": [
+    {
+     "text": "Nem",
+     "start": 163.239,
+     "end": 164.489
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 164.489,
+   "end": 166.489,
+   "words": [
+    {
+     "text": "vagyok",
+     "start": 164.489,
+     "end": 166.489
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 166.489,
+   "end": 169.238,
+   "words": [
+    {
+     "text": "magányos.",
+     "start": 166.489,
+     "end": 169.238
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 172.83,
+   "end": 174.06,
+   "words": [
+    {
+     "text": "Szembe",
+     "start": 172.83,
+     "end": 174.06
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 174.06,
+   "end": 174.829,
+   "words": [
+    {
+     "text": "jön",
+     "start": 174.06,
+     "end": 174.829
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 174.829,
+   "end": 175.906,
+   "words": [
+    {
+     "text": "velem",
+     "start": 174.829,
+     "end": 175.906
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 175.906,
+   "end": 176.675,
+   "words": [
+    {
+     "text": "azt",
+     "start": 175.906,
+     "end": 176.675
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 176.675,
+   "end": 177.905,
+   "words": [
+    {
+     "text": "hiszi,",
+     "start": 176.675,
+     "end": 177.905
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 177.905,
+   "end": 178.828,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 177.905,
+     "end": 178.828
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 178.828,
+   "end": 180.058,
+   "words": [
+    {
+     "text": "ismer.",
+     "start": 178.828,
+     "end": 180.058
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 180.058,
+   "end": 181.596,
+   "words": [
+    {
+     "text": "végignéz",
+     "start": 180.058,
+     "end": 181.596
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 182.57,
+   "end": 183.945,
+   "words": [
+    {
+     "text": "rajtam",
+     "start": 182.57,
+     "end": 183.945
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 183.945,
+   "end": 184.461,
+   "words": [
+    {
+     "text": "a",
+     "start": 183.945,
+     "end": 184.461
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 184.461,
+   "end": 185.837,
+   "words": [
+    {
+     "text": "száját",
+     "start": 184.461,
+     "end": 185.837
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 185.837,
+   "end": 187.556,
+   "words": [
+    {
+     "text": "harapja.",
+     "start": 185.837,
+     "end": 187.556
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 189.79,
+   "end": 190.767,
+   "words": [
+    {
+     "text": "Olyan,",
+     "start": 189.79,
+     "end": 190.767
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 190.767,
+   "end": 191.743,
+   "words": [
+    {
+     "text": "mintha",
+     "start": 190.767,
+     "end": 191.743
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 191.743,
+   "end": 192.354,
+   "words": [
+    {
+     "text": "egy",
+     "start": 191.743,
+     "end": 192.354
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 192.354,
+   "end": 193.208,
+   "words": [
+    {
+     "text": "darab",
+     "start": 192.354,
+     "end": 193.208
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 193.208,
+   "end": 194.063,
+   "words": [
+    {
+     "text": "húsra",
+     "start": 193.208,
+     "end": 194.063
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 194.063,
+   "end": 195.405,
+   "words": [
+    {
+     "text": "vadászna,",
+     "start": 194.063,
+     "end": 195.405
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 195.405,
+   "end": 196.016,
+   "words": [
+    {
+     "text": "Nem",
+     "start": 195.405,
+     "end": 196.016
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 196.016,
+   "end": 196.504,
+   "words": [
+    {
+     "text": "is",
+     "start": 196.016,
+     "end": 196.504
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 197.25,
+   "end": 198.813,
+   "words": [
+    {
+     "text": "értem,",
+     "start": 197.25,
+     "end": 198.813
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 198.813,
+   "end": 199.986,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 198.813,
+     "end": 199.986
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 199.986,
+   "end": 201.354,
+   "words": [
+    {
+     "text": "miért",
+     "start": 199.986,
+     "end": 201.354
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 201.354,
+   "end": 202.722,
+   "words": [
+    {
+     "text": "kéne.",
+     "start": 201.354,
+     "end": 202.722
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 203.33,
+   "end": 203.891,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 203.33,
+     "end": 203.891
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 203.891,
+   "end": 205.198,
+   "words": [
+    {
+     "text": "megengedjem,",
+     "start": 203.891,
+     "end": 205.198
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 205.198,
+   "end": 205.759,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 205.198,
+     "end": 205.759
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 205.759,
+   "end": 206.973,
+   "words": [
+    {
+     "text": "megérítsen,",
+     "start": 205.759,
+     "end": 206.973
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 206.973,
+   "end": 207.534,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 206.973,
+     "end": 207.534
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 207.534,
+   "end": 208.842,
+   "words": [
+    {
+     "text": "megismerjen,",
+     "start": 207.534,
+     "end": 208.842
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 208.842,
+   "end": 209.402,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 208.842,
+     "end": 209.402
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 209.402,
+   "end": 210.71,
+   "words": [
+    {
+     "text": "megragadjon,",
+     "start": 209.402,
+     "end": 210.71
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 211.83,
+   "end": 212.418,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 211.83,
+     "end": 212.418
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 212.418,
+   "end": 213.693,
+   "words": [
+    {
+     "text": "elragadjon,",
+     "start": 212.418,
+     "end": 213.693
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 213.693,
+   "end": 214.281,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 213.693,
+     "end": 214.281
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 214.281,
+   "end": 215.556,
+   "words": [
+    {
+     "text": "eltaposson,",
+     "start": 214.281,
+     "end": 215.556
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 215.556,
+   "end": 216.145,
+   "words": [
+    {
+     "text": "Hogy",
+     "start": 215.556,
+     "end": 216.145
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 216.145,
+   "end": 217.027,
+   "words": [
+    {
+     "text": "ellopja",
+     "start": 216.145,
+     "end": 217.027
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 217.027,
+   "end": 217.321,
+   "words": [
+    {
+     "text": "a",
+     "start": 217.027,
+     "end": 217.321
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 217.321,
+   "end": 218.4,
+   "words": [
+    {
+     "text": "fényemet,",
+     "start": 217.321,
+     "end": 218.4
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 219.35,
+   "end": 219.812,
+   "words": [
+    {
+     "text": "És",
+     "start": 219.35,
+     "end": 219.812
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 219.812,
+   "end": 220.851,
+   "words": [
+    {
+     "text": "elvegye",
+     "start": 219.812,
+     "end": 220.851
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 220.851,
+   "end": 221.198,
+   "words": [
+    {
+     "text": "a",
+     "start": 220.851,
+     "end": 221.198
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 221.198,
+   "end": 222.468,
+   "words": [
+    {
+     "text": "lelkemet,",
+     "start": 221.198,
+     "end": 222.468
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 222.468,
+   "end": 222.93,
+   "words": [
+    {
+     "text": "És",
+     "start": 222.468,
+     "end": 222.93
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 222.93,
+   "end": 224.2,
+   "words": [
+    {
+     "text": "megtegye,",
+     "start": 222.93,
+     "end": 224.2
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 224.2,
+   "end": 224.893,
+   "words": [
+    {
+     "text": "amit",
+     "start": 224.2,
+     "end": 224.893
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 224.893,
+   "end": 225.47,
+   "words": [
+    {
+     "text": "nem",
+     "start": 224.893,
+     "end": 225.47
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 226.15,
+   "end": 228.208,
+   "words": [
+    {
+     "text": "tehet",
+     "start": 226.15,
+     "end": 228.208
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 228.208,
+   "end": 231.148,
+   "words": [
+    {
+     "text": "egyedül,",
+     "start": 228.208,
+     "end": 231.148
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 231.148,
+   "end": 234.088,
+   "words": [
+    {
+     "text": "egyedül.",
+     "start": 231.148,
+     "end": 234.088
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 234.97,
+   "end": 236.2,
+   "words": [
+    {
+     "text": "Szembe",
+     "start": 234.97,
+     "end": 236.2
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 236.2,
+   "end": 236.969,
+   "words": [
+    {
+     "text": "jön",
+     "start": 236.2,
+     "end": 236.969
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 236.969,
+   "end": 238.199,
+   "words": [
+    {
+     "text": "velem,",
+     "start": 236.969,
+     "end": 238.199
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 238.199,
+   "end": 238.968,
+   "words": [
+    {
+     "text": "azt",
+     "start": 238.199,
+     "end": 238.968
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 238.968,
+   "end": 240.198,
+   "words": [
+    {
+     "text": "hiszi,",
+     "start": 238.968,
+     "end": 240.198
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 240.198,
+   "end": 241.12,
+   "words": [
+    {
+     "text": "hogy",
+     "start": 240.198,
+     "end": 241.12
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 241.12,
+   "end": 242.35,
+   "words": [
+    {
+     "text": "ismer,",
+     "start": 241.12,
+     "end": 242.35
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 243.17,
+   "end": 245.044,
+   "words": [
+    {
+     "text": "végignéz",
+     "start": 243.17,
+     "end": 245.044
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 245.044,
+   "end": 246.543,
+   "words": [
+    {
+     "text": "rajtam",
+     "start": 245.044,
+     "end": 246.543
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 246.543,
+   "end": 247.105,
+   "words": [
+    {
+     "text": "a",
+     "start": 246.543,
+     "end": 247.105
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 247.105,
+   "end": 248.604,
+   "words": [
+    {
+     "text": "száját",
+     "start": 247.105,
+     "end": 248.604
+    }
+   ]
+  },
+  {
+   "section": "single",
+   "start": 248.604,
+   "end": 250.478,
+   "words": [
+    {
+     "text": "harapja.",
+     "start": 248.604,
+     "end": 250.478
+    }
+   ]
+  }
+ ]
+}
