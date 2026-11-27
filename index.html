@@ -50,7 +50,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 #nText:focus{outline:2px solid var(--wordb);outline-offset:1px}
 #nAdd{justify-content:center;font-variant-numeric:tabular-nums}
 #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
-#bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#bgimg,#bgvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .msg{position:absolute;inset:0;display:grid;place-items:center;color:#bbb;font-size:16px;text-align:center;padding:20px}
 .mon iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
 #verr{position:absolute;left:8px;right:8px;bottom:8px;max-height:70%;overflow:auto;display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--ph);border-radius:6px;background:#2a1215;font-size:13px}
@@ -88,7 +88,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 <nav class="menubar">
   <details class="menu"><summary>File</summary><div class="drop">
     <label class="fb" id="lbT">Upload lyrics (SRT / JSON / document)<input id="fT" type="file" accept=".srt,.json,.txt,.md,.docx,.doc,.odt,.rtf,.pdf,.html,.htm,.pages"></label>
-    <label class="fb" id="lbB">Upload background<input id="fB" type="file" accept="image/*"></label>
+    <label class="fb" id="lbB">Upload background (image / video)<input id="fB" type="file" accept="image/*,video/*,.mkv,.avi,.wmv,.flv,.m4v,.mov,.mpg,.mpeg,.3gp,.mts,.m2ts,.mxf,.vob"></label>
     <label class="fb" id="lbA">Upload sound (MP3)<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
     <label class="fb" id="lbV">Upload code (TSX)<input id="fV" type="file" accept=".tsx,.jsx,.ts,.js"></label>
     <hr><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
@@ -100,7 +100,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   </div></details>
   <span id="busy" role="status" hidden>Fitting with AI…</span>
 </nav>
-<div class="mid"><div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div><div id="verr" hidden><span id="verrT"></span><button id="verrC">Copy error</button></div></div></div>
+<div class="mid"><div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><video id="bgvid" muted playsinline preload="auto" hidden></video><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div><div id="verr" hidden><span id="verrT"></span><button id="verrC">Copy error</button></div></div></div>
   <aside id="notes" aria-label="Comments" hidden>
     <div class="n-head">Comments<button id="nSave">Download JSON</button></div>
     <ul id="nList"></ul>
@@ -246,9 +246,36 @@ async function loadAudio(f){audioFile=f;au.src=URL.createObjectURL(f);$('lbA').c
     peaks=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*per;j<(i+1)*per;j+=3){const v=Math.abs(ch[j]);if(v>m)m=v}peaks[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)peaks[i]/=mx||1;ac.close();if(D.draft)D.words=spread(D.words.map(w=>w.text));build()}catch(e){toast('Could not draw the waveform for this file')}}
 const ready=()=>{$('msg').hidden=!!(au.src&&D.words.length);if(!au.src&&D.words.length)$('msg').textContent='Now load the MP3.'};
 $('fT').onchange=e=>e.target.files[0]&&loadText(e.target.files[0]);$('fA').onchange=e=>e.target.files[0]&&loadAudio(e.target.files[0]);
-$('fB').onchange=e=>{const f=e.target.files[0];if(!f)return;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false;$('lbB').classList.add('ok')};
+/* ---------- background: image or video ---------- */
+const VIDEO=/\.(mp4|m4v|mov|webm|ogv|mkv|avi|wmv|flv|mpe?g|3gp|m?2?ts|mts|mxf|vob)$/i,bgv=$('bgvid');
+let bgJob=0,ff=null;
+function loadBg(f){const job=++bgJob,img=f.type.startsWith('image/');if(ff){ff.terminate();ff=null}
+  bgv.onerror=bgv.onloadedmetadata=null;bgv.removeAttribute('src');bgv.load();bgv.hidden=true;$('bgimg').hidden=true;$('lbB').classList.remove('ok');
+  const done=el=>{el.hidden=false;$('lbB').classList.add('ok')};
+  if(img){$('bgimg').src=URL.createObjectURL(f);return done($('bgimg'))}
+  const show=(blob,converted)=>{const fail=()=>{bgv.onerror=bgv.onloadedmetadata=null;converted?toast('Could not play this video'):convertBg(f,job,show)};
+    bgv.onerror=fail;bgv.onloadedmetadata=()=>{if(!bgv.videoWidth)return fail();done(bgv);if(converted)toast('Video ready')};bgv.src=URL.createObjectURL(blob)};
+  show(f)}
+// Formats the browser can't play (AVI, WMV, ProRes…) are converted to MP4 here in the browser; nothing is uploaded.
+async function convertBg(f,job,show){const say=m=>{if(job===bgJob)toast(m)};say('Converting the video, this can take a while…');let mine;
+  try{const cdn='https://cdn.jsdelivr.net/npm/@ffmpeg/',{FFmpeg}=await import(cdn+'ffmpeg@0.12.10/dist/esm/index.js');if(job!==bgJob)return;
+    mine=ff=new FFmpeg();ff.on('progress',({progress:p})=>say('Converting the video… '+Math.min(99,Math.max(0,Math.round(p*100)))+'%'));
+    // a cross-origin worker is not allowed, so load it through a same-origin blob
+    await mine.load({classWorkerURL:URL.createObjectURL(new Blob([`import "${cdn}ffmpeg@0.12.10/dist/esm/worker.js"`],{type:'text/javascript'})),
+      coreURL:cdn+'core@0.12.6/dist/esm/ffmpeg-core.js',wasmURL:cdn+'core@0.12.6/dist/esm/ffmpeg-core.wasm'});
+    const inp='in.'+f.name.split('.').pop();await mine.writeFile(inp,new Uint8Array(await f.arrayBuffer()));
+    if(await mine.exec(['-i',inp,'-an','-vf','scale=trunc(min(1280\\,iw)/2)*2:-2','-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p','out.mp4']))throw Error('ffmpeg failed');
+    const out=await mine.readFile('out.mp4');if(job===bgJob)show(new Blob([out],{type:'video/mp4'}),true)}
+  catch(e){console.error(e);say('Could not convert this video. Try an MP4.')}
+  finally{if(mine){mine.terminate();if(ff===mine)ff=null}}}
+// The song is the only clock: the video follows it and loops if it is shorter.
+function bgSync(t){const d=bgv.duration;if(bgv.hidden||!d)return;const want=isFinite(d)?t%d:t,off=Math.abs(bgv.currentTime-want);
+  bgv.playbackRate=au.playbackRate;
+  if(!bgv.seeking&&off>(au.paused?.04:.3))bgv.currentTime=want;
+  if(au.paused){if(!bgv.paused)bgv.pause()}else if(bgv.paused)bgv.play().catch(()=>{})}
+$('fB').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)loadBg(f)};
 document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(LYRICS.test(f.name))loadText(f);else if(/\.(tsx|jsx|ts|js)$/i.test(f.name))loadVideo(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
+document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(LYRICS.test(f.name))loadText(f);else if(/\.(tsx|jsx|ts|js)$/i.test(f.name))loadVideo(f);else if(f.type.startsWith('image/')||f.type.startsWith('video/')||VIDEO.test(f.name))loadBg(f);else loadAudio(f)}});
 
 /* ---------- timeline ---------- */
 const X=t=>t*pps;
@@ -526,7 +553,7 @@ $('sS').onclick=()=>saveFile((name||'lyrics')+'.synced.srt',toSrt(),'text/plain'
 
 /* ---------- loop ---------- */
 let litIdx=-1;
-(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';vf?vSync(t):drawStage(t);if(vf)$('nAdd').textContent='Add comment at '+fmt(t);
+(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';vf?vSync(t):drawStage(t);bgSync(t);if(vf)$('nAdd').textContent='Add comment at '+fmt(t);
   let li=-1;for(let i=0;i<D.words.length;i++){if(t>=D.words[i].s&&t<D.words[i].e){li=i;break}}
   if(li!==litIdx){document.querySelectorAll('.clip.lit').forEach(n=>n.classList.remove('lit'));const n=document.querySelector(`.clip.w[data-i="${li}"]`);n&&n.classList.add('lit');litIdx=li}
   if(!au.paused&&!drag){const x=X(t)-tl.scrollLeft;if(x>tl.clientWidth*.8||x<0)tl.scrollLeft=X(t)-tl.clientWidth*.2}
