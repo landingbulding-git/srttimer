@@ -59,7 +59,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 </head>
 <body>
 <div class="bar">
-  <label class="fb" id="lbT">SRT / JSON<input id="fT" type="file" accept=".srt,.json"></label>
+  <label class="fb" id="lbT">SRT / TXT / JSON<input id="fT" type="file" accept=".srt,.txt,.json"></label>
   <label class="fb" id="lbA">MP3<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
   <label class="fb" id="lbB">Background<input id="fB" type="file" accept="image/*"></label>
   <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
@@ -69,7 +69,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   <button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button>
   <button id="undo">Undo</button><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
 </div>
-<div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the SRT and the MP3 (or drop them here).</div></div></div>
+<div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div></div></div>
 <div>
   <div class="tl-head"><div class="tools">
       <button id="bDL" title="Delete left of playhead (Q)" aria-label="Delete left"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/><rect x="10" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="13" y="5" width="5" height="10" rx="1.5" fill="currentColor"/></svg></button>
@@ -136,6 +136,13 @@ const parseSrt=t=>t.replace(/\r/g,'').trim().split(/\n\s*\n/).map(b=>{const l=b.
 function fromSrt(cues){const lines=[],words=[];cues.forEach(c=>{
   const ws=c.text.split(/\s+/).filter(Boolean),wt=ws.map(w=>w.length+2),tot=wt.reduce((a,b)=>a+b,0),span=(c.end-c.start)*.9;let acc=0;
   ws.forEach((w,i)=>{const s=c.start+acc/tot*span;acc+=wt[i];words.push({text:w,s:r3(s),e:r3(c.start+acc/tot*span)})})});return{lines,words}}
+// Plain lyrics have no timing: spread the words over the song as a draft for "Fit with AI".
+// Skips [Chorus]-style label lines and tokens without a letter or digit.
+const txtWords=t=>t.split(/\r?\n/).filter(l=>!/^\s*\[[^\]]*\]\s*$/.test(l)).join(' ').split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w));
+function spread(ws){const wt=ws.map(w=>w.length+2),tot=wt.reduce((a,b)=>a+b,0),span=dur?dur*.95:ws.length*.5;let acc=0;
+  return ws.map((w,i)=>{const s=acc/tot*span;acc+=wt[i];return{text:w,s:r3(s),e:r3(acc/tot*span)}})}
+// Older Hungarian text files are often Windows-1250 rather than UTF-8.
+const readTxt=async f=>{const b=await f.arrayBuffer();try{return new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){return new TextDecoder('windows-1250').decode(b)}};
 function fromJson(j){const lines=[],words=[];j.lines.forEach(l=>{const st=l.start??l.words[0].start;if(l.section!=='single')lines.push({section:l.section||'verse',start:st,end:l.end});
   l.words.forEach(w=>words.push({text:w.text,s:w.start,e:w.end??w.start+.3}))});return{lines,words}}
 const toJson=()=>({version:4,artist:D.artist,title:D.title,fps:FPS,lines:[...D.lines.map((l,li)=>({section:l.section,start:l.start,end:l.end,words:wordsOf(li).map(w=>({text:w.text,start:w.s,end:w.e}))})).filter(l=>l.words.length),
@@ -143,21 +150,27 @@ const toJson=()=>({version:4,artist:D.artist,title:D.title,fps:FPS,lines:[...D.l
 const toSrt=()=>{const f=t=>{const ms=Math.round(t*1000);return[Math.floor(ms/3600000),Math.floor(ms/60000)%60,Math.floor(ms/1000)%60].map(x=>String(x).padStart(2,'0')).join(':')+','+String(ms%1000).padStart(3,'0')};
   return toJson().lines.map((l,i)=>`${i+1}\n${f(l.start)} --> ${f(l.end)}\n${l.words.map(w=>w.text).join(' ')}\n`).join('\n')};
 const store=()=>{try{localStorage.setItem('lyricsync4:'+name,JSON.stringify(D))}catch(e){}};
-const snap=()=>{undo.push(JSON.stringify(D));if(undo.length>300)undo.shift()};
-async function loadText(f){const txt=await f.text();name=f.name.replace(/(\.words|\.synced)?\.(srt|json)$/i,'');
-  if(/\.json$/i.test(f.name)){const j=JSON.parse(txt);D={artist:j.artist||'',title:j.title||'',...fromJson(j)}}
+const snap=()=>{delete D.draft;undo.push(JSON.stringify(D));if(undo.length>300)undo.shift()};
+async function loadText(f){const isTxt=/\.txt$/i.test(f.name),txt=isTxt?await readTxt(f):await f.text(),lyr=isTxt?txtWords(txt):null;
+  if(lyr&&!lyr.length)return toast('No lyrics found in that file');
+  name=f.name.replace(/(\.words|\.synced)?\.(srt|txt|json)$/i,'');
+  if(isTxt){let sv=null;try{sv=JSON.parse(localStorage.getItem('lyricsync4:'+name))}catch(e){}
+    // restore earlier edits only if they belong to exactly these lyrics
+    if(sv&&sv.words&&sv.words.map(w=>w.text).join(' ')===lyr.join(' ')){D=sv;toast('Your earlier edits were restored')}
+    else{D={artist:'',title:'',lines:[],words:spread(lyr),draft:true};toast('Lyrics loaded. Load the MP3, then press Fit with AI')}}
+  else if(/\.json$/i.test(f.name)){const j=JSON.parse(txt);D={artist:j.artist||'',title:j.title||'',...fromJson(j)}}
   else{D={artist:'',title:'',...fromSrt(parseSrt(txt))};let sv=null,old=null;try{sv=JSON.parse(localStorage.getItem('lyricsync4:'+name));old=JSON.parse(localStorage.getItem('lyricsync3:'+name))}catch(e){}
     if(sv&&sv.words&&sv.words.length){D=sv;toast('Your earlier edits were restored')}
     else if(old&&old.words&&old.words.length){D={...old,lines:[]};toast('Your earlier word timings were restored (scenes cleared)')}}
   undo=[];sel=null;selW.clear();$('lbT').classList.add('ok');ready();build()}
 async function loadAudio(f){audioFile=f;au.src=URL.createObjectURL(f);$('lbA').classList.add('ok');ready();
   try{const ac=new AudioContext();const buf=await ac.decodeAudioData(await f.arrayBuffer());dur=buf.duration;const ch=buf.getChannelData(0),per=Math.floor(buf.sampleRate/200),n=Math.floor(ch.length/per);
-    peaks=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*per;j<(i+1)*per;j+=3){const v=Math.abs(ch[j]);if(v>m)m=v}peaks[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)peaks[i]/=mx||1;ac.close();build()}catch(e){toast('Could not draw the waveform for this file')}}
+    peaks=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*per;j<(i+1)*per;j+=3){const v=Math.abs(ch[j]);if(v>m)m=v}peaks[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)peaks[i]/=mx||1;ac.close();if(D.draft)D.words=spread(D.words.map(w=>w.text));build()}catch(e){toast('Could not draw the waveform for this file')}}
 const ready=()=>{$('msg').hidden=!!(au.src&&D.words.length);if(!au.src&&D.words.length)$('msg').textContent='Now load the MP3.'};
 $('fT').onchange=e=>e.target.files[0]&&loadText(e.target.files[0]);$('fA').onchange=e=>e.target.files[0]&&loadAudio(e.target.files[0]);
 $('fB').onchange=e=>{const f=e.target.files[0];if(!f)return;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false;$('lbB').classList.add('ok')};
 document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(/\.(srt|json)$/i.test(f.name))loadText(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
+document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(/\.(srt|txt|json)$/i.test(f.name))loadText(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
 
 /* ---------- timeline ---------- */
 const X=t=>t*pps;
