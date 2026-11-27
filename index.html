@@ -23,8 +23,21 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 .bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
 .clock{font-variant-numeric:tabular-nums;font-size:16px;margin:0 8px;min-width:150px}
 .sp{flex:1}
-.mon-wrap{display:grid;place-items:center;padding:10px;min-height:0}
-.mon{position:relative;height:100%;max-width:100%;aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden}
+.mid{display:flex;min-height:0}
+.mon-wrap{flex:1;display:grid;place-items:center;margin:10px;min-height:0;container-type:size}
+.mon{position:relative;width:min(100cqw,100cqh*16/9);aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden}
+#notes{width:clamp(230px,26vw,340px);display:flex;flex-direction:column;min-height:0;overflow:auto;border-left:1px solid var(--line);background:var(--pan)}
+.n-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:600}
+#nList{flex:1;overflow-y:auto;margin:0;padding:0;list-style:none}
+#nList li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 8px;padding:8px 10px;border-bottom:1px solid var(--line)}
+#nList button{min-height:26px;padding:0 8px;font-size:12px;font-variant-numeric:tabular-nums}
+#nList small{color:var(--mut);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#nList p{grid-column:1/-1;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#nList .empty{display:block;color:var(--mut);border:0}
+.n-form{display:grid;gap:6px;padding:8px 10px;border-top:1px solid var(--line)}
+#nText{width:100%;height:64px;resize:none;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+#nText:focus{outline:2px solid var(--wordb);outline-offset:1px}
+#nAdd{justify-content:center;font-variant-numeric:tabular-nums}
 #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
 #bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .msg{position:absolute;inset:0;display:grid;place-items:center;color:#bbb;font-size:16px;text-align:center;padding:20px}
@@ -57,7 +70,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 #ph::before{content:"";position:absolute;top:0;left:-5px;border:6px solid transparent;border-top-color:var(--ph)}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#000;padding:9px 15px;border-radius:7px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
-@media(max-width:700px){#tl{height:230px}.clock{min-width:0}}
+@media(max-width:700px){#tl{height:230px}.clock{min-width:0}.mid{flex-direction:column}#notes{width:auto;height:50%;border-left:0;border-top:1px solid var(--line)}}
 </style>
 </head>
 <body>
@@ -74,7 +87,12 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   <button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button>
   <button id="undo">Undo</button><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
 </div>
-<div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div><div id="verr" hidden><span id="verrT"></span><button id="verrC">Copy error</button></div></div></div>
+<div class="mid"><div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div><div id="verr" hidden><span id="verrT"></span><button id="verrC">Copy error</button></div></div></div>
+  <aside id="notes" aria-label="Comments" hidden>
+    <div class="n-head">Comments<button id="nSave">Download JSON</button></div>
+    <ul id="nList"></ul>
+    <div class="n-form"><textarea id="nText" aria-label="New comment" placeholder="What should change here? (Enter saves, Shift+Enter for a new line)"></textarea><button id="nAdd">Add comment</button></div>
+  </aside></div>
 <div>
   <div class="tl-head"><div class="tools">
       <button id="bDL" title="Delete left of playhead (Q)" aria-label="Delete left"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/><rect x="10" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="13" y="5" width="5" height="10" rx="1.5" fill="currentColor"/></svg></button>
@@ -167,7 +185,7 @@ async function loadText(f){const isTxt=/\.txt$/i.test(f.name),txt=isTxt?await re
   else{D={artist:'',title:'',...fromSrt(parseSrt(txt))};let sv=null,old=null;try{sv=JSON.parse(localStorage.getItem('lyricsync4:'+name));old=JSON.parse(localStorage.getItem('lyricsync3:'+name))}catch(e){}
     if(sv&&sv.words&&sv.words.length){D=sv;toast('Your earlier edits were restored')}
     else if(old&&old.words&&old.words.length){D={...old,lines:[]};toast('Your earlier word timings were restored (scenes cleared)')}}
-  undo=[];sel=null;selW.clear();$('lbT').classList.add('ok');ready();build()}
+  undo=[];sel=null;selW.clear();$('lbT').classList.add('ok');ready();build();loadNotes()}
 async function loadAudio(f){audioFile=f;au.src=URL.createObjectURL(f);$('lbA').classList.add('ok');ready();
   try{const ac=new AudioContext();const buf=await ac.decodeAudioData(await f.arrayBuffer());dur=buf.duration;const ch=buf.getChannelData(0),per=Math.floor(buf.sampleRate/200),n=Math.floor(ch.length/per);
     peaks=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*per;j<(i+1)*per;j+=3){const v=Math.abs(ch[j]);if(v>m)m=v}peaks[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)peaks[i]/=mx||1;ac.close();if(D.draft)D.words=spread(D.words.map(w=>w.text));build()}catch(e){toast('Could not draw the waveform for this file')}}
@@ -282,7 +300,7 @@ const playPause=()=>{if(!au.src)return toast('Load the MP3 first');au.paused?au.
 $('play').onclick=playPause;au.onplay=au.onpause=()=>$('play').textContent=au.paused?'Play':'Pause';
 $('rate').onchange=e=>au.playbackRate=+e.target.value;
 const doUndo=()=>{const u=undo.pop();if(!u)return toast('Nothing to undo');D=JSON.parse(u);sel=null;selW.clear();build()};$('undo').onclick=doUndo;
-addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;const k=e.key;
+addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea'))return;const k=e.key;
   if(k===' '){e.preventDefault();playPause()}
   else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='z'){e.preventDefault();doUndo()}
   else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='g'){e.preventDefault();e.shiftKey?ungroup():group()}
@@ -389,12 +407,12 @@ addEventListener('message',e=>{if(e.source!==parent)return;const m=e.data;try{
 }catch(err){fail(err)}});
 parent.postMessage({ready:true},'*');
 <\/script>`;
-let vf=null,vcode='',vlive=false,vsent='',vchk=0;
+let vf=null,vname='',vcode='',vlive=false,vsent='',vchk=0;
 const vpost=m=>vf.contentWindow.postMessage(m,'*');
 const vError=m=>{$('verrT').textContent=m;$('verr').hidden=!m};
 const copy=(t,done)=>navigator.clipboard.writeText(t).then(()=>toast(done),()=>prompt('Copy this text:',t));
-function vRemove(){if(vf)vf.remove();vf=null;vlive=false;vError('');$('stage').hidden=false;$('vx').hidden=true;$('lbV').classList.remove('ok')}
-async function loadVideo(f){const code=await f.text();vRemove();vcode=code;
+function vRemove(){if(vf)vf.remove();vf=null;vlive=false;vError('');$('stage').hidden=false;$('vx').hidden=true;$('notes').hidden=true;$('lbV').classList.remove('ok')}
+async function loadVideo(f){const code=await f.text();vRemove();vcode=code;vname=f.name;$('notes').hidden=false;
   vf=document.createElement('iframe');vf.setAttribute('sandbox','allow-scripts');vf.tabIndex=-1;vf.title='Video preview';vf.srcdoc=VDOC;
   $('msg').before(vf);$('stage').hidden=true;$('vx').hidden=false;$('lbV').classList.add('ok');toast('Loading the video…')}
 addEventListener('message',e=>{if(!vf||e.source!==vf.contentWindow)return;const m=e.data;
@@ -410,9 +428,31 @@ $('fV').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)loadVideo(
 $('vx').onclick=vRemove;
 $('verrC').onclick=()=>copy($('verrT').textContent,'Error copied');
 
+/* ---------- comments ---------- */
+// Notes about the video, each tied to a moment of the song. Kept per song in this browser.
+let notes=[];
+const noteKey=()=>'lyricsync-notes:'+name;
+function loadNotes(){try{notes=JSON.parse(localStorage.getItem(noteKey()))||[]}catch(e){notes=[]}drawNotes()}
+function keepNotes(){try{localStorage.setItem(noteKey(),JSON.stringify(notes))}catch(e){toast('Could not store the comment, download the JSON')}drawNotes()}
+function drawNotes(){$('nList').innerHTML=notes.map((n,i)=>`<li><button data-go="${i}" title="Jump to this moment">${fmt(n.time)}</button><small>${esc(n.lyric)}</small><button data-del="${i}" title="Delete comment" aria-label="Delete comment">×</button><p>${esc(n.comment)}</p></li>`).join('')||'<li class="empty">No comments yet. Stop the song where you want a change and write it below.</li>'}
+function addNote(){const comment=$('nText').value.trim();if(!comment)return toast('Write a comment first');
+  const time=r3(au.currentTime||0),lyric=D.words.filter(w=>w.s<=time).slice(-3).map(w=>w.text).join(' ');
+  const n={time,lyric,comment};notes.push(n);notes.sort((a,b)=>a.time-b.time);$('nText').value='';keepNotes();
+  $('nList').children[notes.indexOf(n)].scrollIntoView({block:'nearest'})}
+$('nAdd').onclick=addNote;
+$('nText').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();addNote()}};
+// the song stops as soon as you type, so the comment stays at the moment you meant
+$('nText').oninput=()=>au.paused||au.pause();
+$('nList').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.go){au.currentTime=notes[b.dataset.go].time;tl.scrollLeft=X(au.currentTime)-tl.clientWidth*.2}
+  else if(confirm('Delete this comment?')){notes.splice(+b.dataset.del,1);keepNotes()}};
+$('nSave').onclick=()=>{if(!notes.length)return toast('No comments yet');
+  download((name||'lyrics')+'.comments.json',JSON.stringify({song:name,videoFile:vname,fps:FPS,comments:notes.map(n=>({time:n.time,timecode:fmt(n.time),frame:Math.floor(n.time*FPS),lyric:n.lyric,comment:n.comment}))},null,1),'application/json')};
+
 /* ---------- save ---------- */
 let dl=null;(async()=>{try{dl=window.claude&&await window.claude.use('downloads')}catch(e){}})();
-async function saveFile(fn,data,type){if(!D.words.length)return toast('Load an SRT first');
+const saveFile=(fn,data,type)=>D.words.length?download(fn,data,type):toast('Load an SRT first');
+async function download(fn,data,type){
   if(dl){try{await dl.save({filename:fn,data});toast('Saved '+fn)}catch(e){toast('Save was declined')}return}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=fn;a.click()}
 $('sJ').onclick=()=>saveFile((name||'lyrics')+'.words.json',JSON.stringify(toJson(),null,1),'application/json');
@@ -420,12 +460,12 @@ $('sS').onclick=()=>saveFile((name||'lyrics')+'.synced.srt',toSrt(),'text/plain'
 
 /* ---------- loop ---------- */
 let litIdx=-1;
-(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';vf?vSync(t):drawStage(t);
+(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';vf?vSync(t):drawStage(t);if(vf)$('nAdd').textContent='Add comment at '+fmt(t);
   let li=-1;for(let i=0;i<D.words.length;i++){if(t>=D.words[i].s&&t<D.words[i].e){li=i;break}}
   if(li!==litIdx){document.querySelectorAll('.clip.lit').forEach(n=>n.classList.remove('lit'));const n=document.querySelector(`.clip.w[data-i="${li}"]`);n&&n.classList.add('lit');litIdx=li}
   if(!au.paused&&!drag){const x=X(t)-tl.scrollLeft;if(x>tl.clientWidth*.8||x<0)tl.scrollLeft=X(t)-tl.clientWidth*.2}
   requestAnimationFrame(loop)})();
-build();
+build();loadNotes();
 }
 </script>
 </body>
