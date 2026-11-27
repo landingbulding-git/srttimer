@@ -67,7 +67,6 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   <label class="fb" id="lbB">Background<input id="fB" type="file" accept="image/*"></label>
   <label class="fb" id="lbV">Video code (TSX)<input id="fV" type="file" accept=".tsx,.jsx,.ts,.js"></label>
   <button id="vx" title="Back to the plain text preview" hidden>Remove video</button>
-  <button id="vr" title="The rules to give Claude before it writes the video code">Copy instructions for Claude</button>
   <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
   <select id="rate" aria-label="Speed"><option value="1">1×</option><option value="0.75">0.75×</option><option value="0.5">0.5×</option></select>
   <button id="ai" title="Time every word automatically from the MP3">Fit with AI</button>
@@ -390,14 +389,6 @@ addEventListener('message',e=>{if(e.source!==parent)return;const m=e.data;try{
 }catch(err){fail(err)}});
 parent.postMessage({ready:true},'*');
 <\/script>`;
-const RULES=`Write the lyric video as ONE Remotion component in ONE .tsx file, following these rules:
-- Import only from 'react' and 'remotion'.
-- Export the main component as the default export.
-- It receives one prop, lyrics: {lines:[{section,start,end,words:[{text,start,end}]}]}, times in seconds. Never write the lyrics' timings into the code.
-- Also export a function durationInFrames(lyrics).
-- 1920x1080, 30 fps, transparent background. Do not draw a background image or play audio: the preview app shows the background and plays the song.
-- No local files and no staticFile(). Google Fonts are fine; use delayRender until they are loaded.
-- Calculate everything from the current frame.`;
 let vf=null,vcode='',vlive=false,vsent='',vchk=0;
 const vpost=m=>vf.contentWindow.postMessage(m,'*');
 const vError=m=>{$('verrT').textContent=m;$('verr').hidden=!m};
@@ -417,7 +408,6 @@ function vSync(t){if(!vlive)return;const now=performance.now();
 // the input is cleared so a corrected file with the same name can be uploaded again
 $('fV').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)loadVideo(f)};
 $('vx').onclick=vRemove;
-$('vr').onclick=()=>copy(RULES,'Instructions copied');
 $('verrC').onclick=()=>copy($('verrT').textContent,'Error copied');
 
 /* ---------- save ---------- */
