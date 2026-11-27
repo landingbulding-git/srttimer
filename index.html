@@ -18,10 +18,21 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Inter Tight",
 button,.fb,select{font:inherit;color:inherit;min-height:36px;padding:0 12px;border-radius:7px;border:1px solid var(--line);background:var(--pan);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px solid var(--wordb);outline-offset:1px}
 .fb input{display:none}.fb.ok{border-color:var(--wordb);color:var(--wordb)}
-#ai{border-color:var(--wordb);color:var(--wordb);font-weight:600}#ai:disabled{opacity:.6;cursor:wait}
 #play{background:var(--ink);color:#000;border-color:var(--ink);min-width:80px;justify-content:center;font-weight:600}
-.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
-.clock{font-variant-numeric:tabular-nums;font-size:16px;margin:0 8px;min-width:150px}
+.menubar{display:flex;gap:2px;align-items:center;padding:3px 8px;border-bottom:1px solid var(--line);background:var(--pan)}
+.menu{position:relative}
+.menu summary{list-style:none;cursor:pointer;padding:5px 12px;border-radius:5px;user-select:none}
+.menu summary::-webkit-details-marker{display:none}
+.menu summary:hover,.menu[open] summary{background:var(--line)}
+.menu summary:focus-visible{outline:2px solid var(--wordb);outline-offset:-2px}
+.drop{position:absolute;top:100%;left:0;z-index:30;display:grid;min-width:270px;margin-top:4px;padding:5px;border:1px solid var(--line);border-radius:8px;background:var(--pan);box-shadow:0 10px 30px #000a}
+.drop button,.drop .fb{border:0;background:none;border-radius:5px;justify-content:flex-start;min-height:34px}
+.drop button:hover:enabled,.drop .fb:hover{background:var(--line)}
+.drop button:disabled{opacity:.4;cursor:default}
+.drop .fb.ok::after{content:"✓";margin-left:auto;padding-left:12px}
+.drop hr{width:100%;border:0;border-top:1px solid var(--line);margin:4px 0}
+#busy{margin-left:10px;font-size:13px;color:var(--wordb)}
+.clock{font-variant-numeric:tabular-nums;font-size:14px;margin:0 6px;min-width:128px}
 .sp{flex:1}
 .mid{display:flex;min-height:0}
 .mon-wrap{flex:1;display:grid;place-items:center;margin:10px;min-height:0;container-type:size}
@@ -46,7 +57,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 #verr span{flex:1;white-space:pre-wrap;overflow-wrap:anywhere}
 .tl-head{display:flex;gap:10px;align-items:center;padding:6px 12px;border-top:1px solid var(--line);color:var(--mut);font-size:12px;flex-wrap:wrap}
 .tl-head b{color:var(--ink);font-weight:500}
-.tools{display:flex;gap:4px;align-items:center;margin-right:8px}.tools button{min-height:34px;padding:0 8px}.tools svg{width:20px;height:20px}
+.tools{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-right:8px}.tools button{min-height:34px;padding:0 8px}.tools svg{width:20px;height:20px}
 .tog{font-size:13px}.tog::before{content:"";width:10px;height:10px;border-radius:50%;background:#555}.tog.on{border-color:var(--wordb);color:var(--wordb)}.tog.on::before{background:var(--wordb);box-shadow:0 0 6px var(--wordb)}
 #tl{position:relative;height:250px;overflow-x:auto;overflow-y:hidden;background:var(--pan);user-select:none}
 #inner{position:relative;height:100%}
@@ -74,19 +85,21 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 </style>
 </head>
 <body>
-<div class="bar">
-  <label class="fb" id="lbT">SRT / TXT / JSON<input id="fT" type="file" accept=".srt,.txt,.json"></label>
-  <label class="fb" id="lbA">MP3<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
-  <label class="fb" id="lbB">Background<input id="fB" type="file" accept="image/*"></label>
-  <label class="fb" id="lbV">Video code (TSX)<input id="fV" type="file" accept=".tsx,.jsx,.ts,.js"></label>
-  <button id="vx" title="Back to the plain text preview" hidden>Remove video</button>
-  <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
-  <select id="rate" aria-label="Speed"><option value="1">1×</option><option value="0.75">0.75×</option><option value="0.5">0.5×</option></select>
-  <button id="ai" title="Time every word automatically from the MP3">Fit with AI</button>
-  <span class="sp"></span>
-  <button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button>
-  <button id="undo">Undo</button><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
-</div>
+<nav class="menubar">
+  <details class="menu"><summary>File</summary><div class="drop">
+    <label class="fb" id="lbT">Upload lyrics (SRT / TXT / JSON)<input id="fT" type="file" accept=".srt,.txt,.json"></label>
+    <label class="fb" id="lbB">Upload background<input id="fB" type="file" accept="image/*"></label>
+    <label class="fb" id="lbA">Upload sound (MP3)<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
+    <label class="fb" id="lbV">Upload code (TSX)<input id="fV" type="file" accept=".tsx,.jsx,.ts,.js"></label>
+    <hr><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
+  </div></details>
+  <details class="menu"><summary>Edit</summary><div class="drop">
+    <button id="undo">Undo</button>
+    <button id="vx" disabled>Remove code</button>
+    <button id="ai" title="Time every word automatically from the MP3">Fit with AI</button>
+  </div></details>
+  <span id="busy" role="status" hidden>Fitting with AI…</span>
+</nav>
 <div class="mid"><div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div><div id="verr" hidden><span id="verrT"></span><button id="verrC">Copy error</button></div></div></div>
   <aside id="notes" aria-label="Comments" hidden>
     <div class="n-head">Comments<button id="nSave">Download JSON</button></div>
@@ -98,9 +111,12 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
       <button id="bDL" title="Delete left of playhead (Q)" aria-label="Delete left"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/><rect x="10" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="13" y="5" width="5" height="10" rx="1.5" fill="currentColor"/></svg></button>
       <button id="bSp" title="Split at playhead (⌘B)" aria-label="Split"><svg viewBox="0 0 20 20"><rect x="1.5" y="5" width="7" height="10" rx="1.5" fill="currentColor"/><rect x="11.5" y="5" width="7" height="10" rx="1.5" fill="currentColor"/><rect x="9.2" y="2" width="1.6" height="16" fill="#ff4d4d"/></svg></button>
       <button id="bDR" title="Delete right of playhead (W)" aria-label="Delete right"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="5" height="10" rx="1.5" fill="currentColor"/><rect x="8.4" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="11" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/></svg></button>
-      <button id="bAuto" class="tog on" title="When a word changes, the neighbouring word fills the gap">Auto-align</button></div>
+      <button id="bAuto" class="tog on" title="When a word changes, the neighbouring word fills the gap">Auto-align</button>
+      <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
+      <select id="rate" aria-label="Speed"><option value="1">1×</option><option value="0.75">0.75×</option><option value="0.5">0.5×</option></select></div>
     <span id="selInfo"><b>Nothing selected</b></span><span class="sp"></span>
-    <span><b>⇧</b>-click range · <b>⌘</b>-click add · drag selected words together · <b>, .</b> nudge · <b>⌘G</b> scene · <b>⌘⇧G</b> ungroup · <b>Q</b>/<b>W</b> delete left/right · <b>⌘B</b> split · <b>Space</b> play · ⌘+wheel zoom</span></div>
+    <span><b>⇧</b>-click range · <b>⌘</b>-click add · drag selected words together · <b>, .</b> nudge · <b>⌘G</b> scene · <b>⌘⇧G</b> ungroup · <b>Q</b>/<b>W</b> delete left/right · <b>⌘B</b> split · <b>Space</b> play · ⌘+wheel zoom</span>
+    <div class="tools"><button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button></div></div>
   <div id="tl"><div id="inner"><canvas id="wave"></canvas><div class="ruler-hit" id="rh"></div>
     <div class="track" id="tScenes"><span class="lab">Scenes</span></div>
     <div class="track" id="tWords"><span class="lab">Words</span></div><div id="ph"></div></div></div>
@@ -300,7 +316,7 @@ const playPause=()=>{if(!au.src)return toast('Load the MP3 first');au.paused?au.
 $('play').onclick=playPause;au.onplay=au.onpause=()=>$('play').textContent=au.paused?'Play':'Pause';
 $('rate').onchange=e=>au.playbackRate=+e.target.value;
 const doUndo=()=>{const u=undo.pop();if(!u)return toast('Nothing to undo');D=JSON.parse(u);sel=null;selW.clear();build()};$('undo').onclick=doUndo;
-addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea'))return;const k=e.key;
+addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea,summary'))return;const k=e.key;
   if(k===' '){e.preventDefault();playPause()}
   else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='z'){e.preventDefault();doUndo()}
   else if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==='g'){e.preventDefault();e.shiftKey?ungroup():group()}
@@ -346,7 +362,7 @@ function applyTimes(times){const W=D.words,scenes=D.lines.map((l,li)=>{const ws=
 async function fitAI(){
   if(!D.words.length||!audioFile)return toast('Load the SRT and the MP3 first');
   const btn=$('ai'),file=audioFile,texts=()=>JSON.stringify(D.words.map(w=>w.text)),sent=texts(),words=D.words.map(w=>w.text.trim().split(/\s+/));
-  btn.disabled=true;btn.textContent='Fitting…';
+  btn.disabled=true;btn.textContent='Fitting…';$('busy').hidden=false;
   try{const body=new FormData();body.append('file',file.size>MAXUP?await shrink(file):file);body.append('text',words.map(p=>p.join(' ')).join(' '));
     const res=await fetch('/api/align',{method:'POST',body});
     const j=await res.json().catch(()=>null);
@@ -360,7 +376,7 @@ async function fitAI(){
     snap();applyTimes(times);sel=null;selW.clear();build();
     toast(kept?`Fitted. ${kept} hand-edited words kept (Undo to revert)`:'Fitted. Undo to revert')}
   catch(e){alert('Fit with AI failed: '+e.message)}
-  finally{btn.disabled=false;btn.textContent='Fit with AI'}}
+  finally{btn.disabled=false;btn.textContent='Fit with AI';$('busy').hidden=true}}
 $('ai').onclick=fitAI;
 
 /* ---------- video code preview ---------- */
@@ -411,10 +427,10 @@ let vf=null,vname='',vcode='',vlive=false,vsent='',vchk=0;
 const vpost=m=>vf.contentWindow.postMessage(m,'*');
 const vError=m=>{$('verrT').textContent=m;$('verr').hidden=!m};
 const copy=(t,done)=>navigator.clipboard.writeText(t).then(()=>toast(done),()=>prompt('Copy this text:',t));
-function vRemove(){if(vf)vf.remove();vf=null;vlive=false;vError('');$('stage').hidden=false;$('vx').hidden=true;$('notes').hidden=true;$('lbV').classList.remove('ok')}
+function vRemove(){if(vf)vf.remove();vf=null;vlive=false;vError('');$('stage').hidden=false;$('vx').disabled=true;$('notes').hidden=true;$('lbV').classList.remove('ok')}
 async function loadVideo(f){const code=await f.text();vRemove();vcode=code;vname=f.name;$('notes').hidden=false;
   vf=document.createElement('iframe');vf.setAttribute('sandbox','allow-scripts');vf.tabIndex=-1;vf.title='Video preview';vf.srcdoc=VDOC;
-  $('msg').before(vf);$('stage').hidden=true;$('vx').hidden=false;$('lbV').classList.add('ok');toast('Loading the video…')}
+  $('msg').before(vf);$('stage').hidden=true;$('vx').disabled=false;$('lbV').classList.add('ok');toast('Loading the video…')}
 addEventListener('message',e=>{if(!vf||e.source!==vf.contentWindow)return;const m=e.data;
   if(m.ready){vsent=JSON.stringify(toJson());vpost({code:vcode,lyrics:JSON.parse(vsent)})}
   else if(m.ok){vlive=true;toast('Video loaded')}
@@ -448,6 +464,17 @@ $('nList').onclick=e=>{const b=e.target.closest('button');if(!b)return;
   else if(confirm('Delete this comment?')){notes.splice(+b.dataset.del,1);keepNotes()}};
 $('nSave').onclick=()=>{if(!notes.length)return toast('No comments yet');
   download((name||'lyrics')+'.comments.json',JSON.stringify({song:name,videoFile:vname,fps:FPS,comments:notes.map(n=>({time:n.time,timecode:fmt(n.time),frame:Math.floor(n.time*FPS),lyric:n.lyric,comment:n.comment}))},null,1),'application/json')};
+
+/* ---------- menus ---------- */
+const menus=[...document.querySelectorAll('.menu')];
+const closeMenus=keep=>menus.forEach(m=>{if(m!==keep)m.open=false});
+// with one menu open, pointing at another switches to it
+menus.forEach(m=>m.firstElementChild.onpointerenter=()=>{if(menus.some(x=>x!==m&&x.open)){closeMenus(m);m.open=true}});
+addEventListener('click',e=>{const m=e.target.closest('.menu');if(!m)return closeMenus();
+  const head=e.target.closest('summary');
+  // focus is dropped after a mouse click so Space keeps playing the song
+  if(head){closeMenus(m);if(e.detail)head.blur()}else setTimeout(()=>{closeMenus();document.activeElement.blur()})});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeMenus()});
 
 /* ---------- save ---------- */
 let dl=null;(async()=>{try{dl=window.claude&&await window.claude.use('downloads')}catch(e){}})();
