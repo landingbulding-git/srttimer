@@ -5,3 +5,6 @@
 *.words.json
 *.response.json
 .env
+
+# lyric video project, kept out of git
+lyric-motion/
