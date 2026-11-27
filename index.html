@@ -87,7 +87,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 <body>
 <nav class="menubar">
   <details class="menu"><summary>File</summary><div class="drop">
-    <label class="fb" id="lbT">Upload lyrics (SRT / TXT / JSON)<input id="fT" type="file" accept=".srt,.txt,.json"></label>
+    <label class="fb" id="lbT">Upload lyrics (SRT / JSON / document)<input id="fT" type="file" accept=".srt,.json,.txt,.md,.docx,.doc,.odt,.rtf,.pdf,.html,.htm,.pages"></label>
     <label class="fb" id="lbB">Upload background<input id="fB" type="file" accept="image/*"></label>
     <label class="fb" id="lbA">Upload sound (MP3)<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
     <label class="fb" id="lbV">Upload code (TSX)<input id="fV" type="file" accept=".tsx,.jsx,.ts,.js"></label>
@@ -182,6 +182,42 @@ function spread(ws){const wt=ws.map(w=>w.length+2),tot=wt.reduce((a,b)=>a+b,0),s
   return ws.map((w,i)=>{const s=acc/tot*span;acc+=wt[i];return{text:w,s:r3(s),e:r3(acc/tot*span)}})}
 // Older Hungarian text files are often Windows-1250 rather than UTF-8.
 const readTxt=async f=>{const b=await f.arrayBuffer();try{return new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){return new TextDecoder('windows-1250').decode(b)}};
+// Every other document type is reduced to plain text and then treated like a TXT file.
+const LYRICS=/\.(srt|json|txt|md|docx|doc|odt|rtf|pdf|html?|pages)$/i;
+// DOCX and ODT are zip files with XML inside: one output line per paragraph.
+async function zipText(f,path){const{unzipSync,strFromU8}=await import('https://cdn.jsdelivr.net/npm/fflate@0.8.2/+esm');
+  const x=new DOMParser().parseFromString(strFromU8(unzipSync(new Uint8Array(await f.arrayBuffer()))[path]),'application/xml'),docx=path[0]==='w';
+  x.querySelectorAll('Fallback,tracked-changes,annotation').forEach(n=>n.remove());
+  const walk=n=>{if(n.nodeType===3)return docx&&n.parentNode.localName!=='t'?'':n.data;const k=n.localName;
+    if(k==='tab'||k==='s')return' ';if(k==='br'||k==='cr'||k==='line-break')return'\n';
+    const t=[...n.childNodes].map(walk).join('');return k==='p'||k==='h'?t+'\n':t};
+  return walk((docx?x:x.getElementsByTagName('office:body')[0]).firstChild||x.documentElement)}
+async function pdfText(f){const base='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/',pdf=await import(base+'pdf.min.mjs');
+  // a cross-origin worker is not allowed, so load it through a same-origin blob
+  pdf.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([`import "${base}pdf.worker.min.mjs"`],{type:'text/javascript'}));
+  const doc=await pdf.getDocument({data:await f.arrayBuffer()}).promise;let out='';
+  for(let i=1;i<=doc.numPages;i++){const c=await(await doc.getPage(i)).getTextContent();out+=c.items.map(t=>(t.str||'')+(t.hasEOL?'\n':'')).join('')+'\n'}
+  return out}
+function rtfText(r){const cp=(r.match(/\\ansicpg(\d+)/)||[])[1]||'1252';let dec;try{dec=new TextDecoder('windows-'+cp)}catch(e){dec=new TextDecoder('windows-1252')}
+  const re=/\\'([0-9a-f]{2})|\\([a-z]+)(-?\d+)? ?|\\([^a-z])|([{}])|[\r\n]+|([^\\{}\r\n])/gi,stack=[];let out='',skip=false,uc=1,eat=0,m;
+  const put=c=>{if(eat)eat--;else if(!skip)out+=c};
+  while(m=re.exec(r)){const[,hex,word,num,sym,brace,ch]=m;
+    if(brace==='{')stack.push([skip,uc]);else if(brace){[skip,uc]=stack.pop()||[false,1];eat=0}
+    else if(hex)put(dec.decode(new Uint8Array([parseInt(hex,16)])));
+    else if(word){if(/^(fonttbl|colortbl|stylesheet|info|pict|header|footer|footnote)$/.test(word))skip=true;
+      else if(word==='uc')uc=+num;else if(word==='u'){eat=0;put(String.fromCharCode(+num&65535));eat=uc}
+      else if(/^(par|line|sect|page|row)$/.test(word))put('\n');else if(word==='tab'||word==='cell')put(' ')}
+    else if(sym){if(sym==='*')skip=true;else if('\\{}'.includes(sym))put(sym);else if(sym==='~')put(' ');else if(sym==='\n'||sym==='\r')put('\n')}
+    else if(ch)put(ch)}
+  return out}
+async function readDoc(f){const ext=f.name.split('.').pop().toLowerCase();
+  if(ext==='docx')return zipText(f,'word/document.xml');if(ext==='odt')return zipText(f,'content.xml');if(ext==='pdf')return pdfText(f);
+  if(ext==='doc'||ext==='pages')throw Error(`.${ext} files can't be read. Save it as DOCX or PDF and upload that.`);
+  const t=await readTxt(f);
+  if(ext==='rtf')return rtfText(t);
+  if(ext==='html'||ext==='htm'){const d=new DOMParser().parseFromString(t,'text/html');d.querySelectorAll('script,style').forEach(n=>n.remove());
+    d.querySelectorAll('br,p,div,li,tr,h1,h2,h3,h4,h5,h6').forEach(n=>n.after('\n'));return d.body.textContent}
+  return ext==='md'?t.replace(/\]\([^)]*\)/g,']').replace(/^\s*[#>]+\s*|[*`~]|(?<![\p{L}\p{N}])_+|_+(?![\p{L}\p{N}])/gmu,''):t}
 function fromJson(j){const lines=[],words=[];j.lines.forEach(l=>{const st=l.start??l.words[0].start;if(l.section!=='single')lines.push({section:l.section||'verse',start:st,end:l.end});
   l.words.forEach(w=>words.push({text:w.text,s:w.start,e:w.end??w.start+.3}))});return{lines,words}}
 const toJson=()=>({version:4,artist:D.artist,title:D.title,fps:FPS,lines:[...D.lines.map((l,li)=>({section:l.section,start:l.start,end:l.end,words:wordsOf(li).map(w=>({text:w.text,start:w.s,end:w.e}))})).filter(l=>l.words.length),
@@ -190,9 +226,12 @@ const toSrt=()=>{const f=t=>{const ms=Math.round(t*1000);return[Math.floor(ms/36
   return toJson().lines.map((l,i)=>`${i+1}\n${f(l.start)} --> ${f(l.end)}\n${l.words.map(w=>w.text).join(' ')}\n`).join('\n')};
 const store=()=>{try{localStorage.setItem('lyricsync4:'+name,JSON.stringify(D))}catch(e){}};
 const snap=()=>{delete D.draft;undo.push(JSON.stringify(D));if(undo.length>300)undo.shift()};
-async function loadText(f){const isTxt=/\.txt$/i.test(f.name),txt=isTxt?await readTxt(f):await f.text(),lyr=isTxt?txtWords(txt):null;
+async function loadText(f){if(!LYRICS.test(f.name))return toast('That file type is not supported');
+  const isTxt=!/\.(srt|json)$/i.test(f.name);let txt;
+  try{txt=isTxt?await readDoc(f):await f.text()}catch(e){return toast(/can't be read/.test(e.message)?e.message:'Could not read that file')}
+  const lyr=isTxt?txtWords(txt):null;
   if(lyr&&!lyr.length)return toast('No lyrics found in that file');
-  name=f.name.replace(/(\.words|\.synced)?\.(srt|txt|json)$/i,'');
+  name=f.name.replace(/(\.words|\.synced)?\.[^.]+$/i,'');
   if(isTxt){let sv=null;try{sv=JSON.parse(localStorage.getItem('lyricsync4:'+name))}catch(e){}
     // restore earlier edits only if they belong to exactly these lyrics
     if(sv&&sv.words&&sv.words.map(w=>w.text).join(' ')===lyr.join(' ')){D=sv;toast('Your earlier edits were restored')}
@@ -209,7 +248,7 @@ const ready=()=>{$('msg').hidden=!!(au.src&&D.words.length);if(!au.src&&D.words.
 $('fT').onchange=e=>e.target.files[0]&&loadText(e.target.files[0]);$('fA').onchange=e=>e.target.files[0]&&loadAudio(e.target.files[0]);
 $('fB').onchange=e=>{const f=e.target.files[0];if(!f)return;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false;$('lbB').classList.add('ok')};
 document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(/\.(srt|txt|json)$/i.test(f.name))loadText(f);else if(/\.(tsx|jsx|ts|js)$/i.test(f.name))loadVideo(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
+document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(LYRICS.test(f.name))loadText(f);else if(/\.(tsx|jsx|ts|js)$/i.test(f.name))loadVideo(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
 
 /* ---------- timeline ---------- */
 const X=t=>t*pps;
