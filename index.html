@@ -28,6 +28,9 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
 #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
 #bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .msg{position:absolute;inset:0;display:grid;place-items:center;color:#bbb;font-size:16px;text-align:center;padding:20px}
+.mon iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+#verr{position:absolute;left:8px;right:8px;bottom:8px;max-height:70%;overflow:auto;display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--ph);border-radius:6px;background:#2a1215;font-size:13px}
+#verr span{flex:1;white-space:pre-wrap;overflow-wrap:anywhere}
 .tl-head{display:flex;gap:10px;align-items:center;padding:6px 12px;border-top:1px solid var(--line);color:var(--mut);font-size:12px;flex-wrap:wrap}
 .tl-head b{color:var(--ink);font-weight:500}
 .tools{display:flex;gap:4px;align-items:center;margin-right:8px}.tools button{min-height:34px;padding:0 8px}.tools svg{width:20px;height:20px}
@@ -62,6 +65,9 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   <label class="fb" id="lbT">SRT / TXT / JSON<input id="fT" type="file" accept=".srt,.txt,.json"></label>
   <label class="fb" id="lbA">MP3<input id="fA" type="file" accept="audio/*,.mp3,.wav"></label>
   <label class="fb" id="lbB">Background<input id="fB" type="file" accept="image/*"></label>
+  <label class="fb" id="lbV">Video code (TSX)<input id="fV" type="file" accept=".tsx,.jsx,.ts,.js"></label>
+  <button id="vx" title="Back to the plain text preview" hidden>Remove video</button>
+  <button id="vr" title="The rules to give Claude before it writes the video code">Copy instructions for Claude</button>
   <button id="play">Play</button><span class="clock" id="clock">0:00.00</span>
   <select id="rate" aria-label="Speed"><option value="1">1×</option><option value="0.75">0.75×</option><option value="0.5">0.5×</option></select>
   <button id="ai" title="Time every word automatically from the MP3">Fit with AI</button>
@@ -69,7 +75,7 @@ button:hover,.fb:hover{border-color:var(--mut)}button:focus-visible{outline:2px 
   <button id="zo" title="Zoom out (−)">−</button><button id="zi" title="Zoom in (+)">+</button>
   <button id="undo">Undo</button><button id="sJ">Save JSON</button><button id="sS">Save SRT</button>
 </div>
-<div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div></div></div>
+<div class="mon-wrap"><div class="mon" id="mon"><img id="bgimg" alt="" hidden><div id="stage"></div><div class="msg" id="msg">Load the lyrics (SRT or TXT) and the MP3 (or drop them here).</div><div id="verr" hidden><span id="verrT"></span><button id="verrC">Copy error</button></div></div></div>
 <div>
   <div class="tl-head"><div class="tools">
       <button id="bDL" title="Delete left of playhead (Q)" aria-label="Delete left"><svg viewBox="0 0 20 20"><rect x="2" y="5" width="7" height="10" rx="1.5" fill="currentColor" opacity=".3"/><rect x="10" y="2" width="1.6" height="16" fill="#ff4d4d"/><rect x="13" y="5" width="5" height="10" rx="1.5" fill="currentColor"/></svg></button>
@@ -170,7 +176,7 @@ const ready=()=>{$('msg').hidden=!!(au.src&&D.words.length);if(!au.src&&D.words.
 $('fT').onchange=e=>e.target.files[0]&&loadText(e.target.files[0]);$('fA').onchange=e=>e.target.files[0]&&loadAudio(e.target.files[0]);
 $('fB').onchange=e=>{const f=e.target.files[0];if(!f)return;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false;$('lbB').classList.add('ok')};
 document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(/\.(srt|txt|json)$/i.test(f.name))loadText(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
+document.addEventListener('drop',e=>{e.preventDefault();for(const f of e.dataTransfer.files){if(/\.(srt|txt|json)$/i.test(f.name))loadText(f);else if(/\.(tsx|jsx|ts|js)$/i.test(f.name))loadVideo(f);else if(f.type.startsWith('image')){$('fB').files;$('bgimg').src=URL.createObjectURL(f);$('bgimg').hidden=false}else loadAudio(f)}});
 
 /* ---------- timeline ---------- */
 const X=t=>t*pps;
@@ -340,6 +346,80 @@ async function fitAI(){
   finally{btn.disabled=false;btn.textContent='Fit with AI'}}
 $('ai').onclick=fitAI;
 
+/* ---------- video code preview ---------- */
+// Claude's Remotion file runs in a sandboxed iframe (no cookies, no access to this page) laid over the background.
+// The app's audio is the only clock: every screen refresh the iframe is told which moment to draw.
+const VDOC=`<!doctype html><meta charset=utf-8>
+<style>:root{color-scheme:dark}html,body,#r{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}</style>
+<script type=importmap>{"imports":{
+"react":"https://esm.sh/react@18.3.1",
+"react/jsx-runtime":"https://esm.sh/react@18.3.1/jsx-runtime",
+"react-dom":"https://esm.sh/react-dom@18.3.1?external=react",
+"react-dom/client":"https://esm.sh/react-dom@18.3.1/client?external=react",
+"remotion":"https://esm.sh/remotion@4.0.547?external=react,react-dom",
+"remotion/no-react":"https://esm.sh/remotion@4.0.547/no-react?external=react,react-dom",
+"remotion/version":"https://esm.sh/remotion@4.0.547/version?external=react,react-dom",
+"@remotion/player":"https://esm.sh/@remotion/player@4.0.547?external=react,react-dom,remotion",
+"sucrase":"https://esm.sh/sucrase@3.35.1"}}<\/script>
+<div id=r></div>
+<script type=module>
+const fail=m=>parent.postMessage({error:String(m&&m.message||m)},'*');
+addEventListener('error',e=>fail(e.message));addEventListener('unhandledrejection',e=>fail(e.reason));
+let React,jsx,remotion,Player,createRoot,transform;
+try{[React,jsx,remotion,{Player},{createRoot},{transform}]=await Promise.all([import('react'),import('react/jsx-runtime'),import('remotion'),import('@remotion/player'),import('react-dom/client'),import('sucrase')])}
+catch(e){fail('Could not load the preview libraries. Check your internet connection. '+e.message);throw e}
+let ex,C,root,player,frames=1;
+function draw(lyrics){
+  const d=ex.durationInFrames,last=Math.max(0,...lyrics.lines.flatMap(l=>l.words.map(w=>w.end)));
+  frames=Math.max(1,Math.ceil((typeof d==='function'?d(lyrics):d)||(last+3)*30));
+  root.render(React.createElement(Player,{ref:p=>{player=p},component:C,inputProps:{lyrics},durationInFrames:frames,fps:30,
+    compositionWidth:1920,compositionHeight:1080,style:{width:'100%',height:'100%'},clickToPlay:false,doubleClickToFullscreen:false,
+    spaceKeyToPlayOrPause:false,errorFallback:({error})=>{fail(error);return null}}));
+}
+addEventListener('message',e=>{if(e.source!==parent)return;const m=e.data;try{
+  if(m.code!=null){
+    const js=transform(m.code,{transforms:['typescript','jsx','imports'],jsxRuntime:'automatic',production:true}).code;
+    const mods={react:React,'react/jsx-runtime':jsx,remotion};ex={};
+    new Function('require','exports',js)(n=>{if(!mods[n])throw Error('This file imports "'+n+'". Only react and remotion are supported.');return mods[n]},ex);
+    const named=Object.keys(ex).filter(k=>/^[A-Z]/.test(k)&&(typeof ex[k]==='function'||ex[k]&&ex[k].$$typeof));
+    C=ex.default||(named.length===1&&ex[named[0]]);
+    if(!C)throw Error('No main component found. The file needs "export default" on its main component.');
+    root=createRoot(document.getElementById('r'));draw(m.lyrics);parent.postMessage({ok:true},'*');
+  }else if(m.lyrics){if(root)draw(m.lyrics)}
+  else if(player)player.seekTo(Math.min(frames-1,Math.floor(m.t*30)));
+}catch(err){fail(err)}});
+parent.postMessage({ready:true},'*');
+<\/script>`;
+const RULES=`Write the lyric video as ONE Remotion component in ONE .tsx file, following these rules:
+- Import only from 'react' and 'remotion'.
+- Export the main component as the default export.
+- It receives one prop, lyrics: {lines:[{section,start,end,words:[{text,start,end}]}]}, times in seconds. Never write the lyrics' timings into the code.
+- Also export a function durationInFrames(lyrics).
+- 1920x1080, 30 fps, transparent background. Do not draw a background image or play audio: the preview app shows the background and plays the song.
+- No local files and no staticFile(). Google Fonts are fine; use delayRender until they are loaded.
+- Calculate everything from the current frame.`;
+let vf=null,vcode='',vlive=false,vsent='',vchk=0;
+const vpost=m=>vf.contentWindow.postMessage(m,'*');
+const vError=m=>{$('verrT').textContent=m;$('verr').hidden=!m};
+const copy=(t,done)=>navigator.clipboard.writeText(t).then(()=>toast(done),()=>prompt('Copy this text:',t));
+function vRemove(){if(vf)vf.remove();vf=null;vlive=false;vError('');$('stage').hidden=false;$('vx').hidden=true;$('lbV').classList.remove('ok')}
+async function loadVideo(f){const code=await f.text();vRemove();vcode=code;
+  vf=document.createElement('iframe');vf.setAttribute('sandbox','allow-scripts');vf.tabIndex=-1;vf.title='Video preview';vf.srcdoc=VDOC;
+  $('msg').before(vf);$('stage').hidden=true;$('vx').hidden=false;$('lbV').classList.add('ok');toast('Loading the video…')}
+addEventListener('message',e=>{if(!vf||e.source!==vf.contentWindow)return;const m=e.data;
+  if(m.ready){vsent=JSON.stringify(toJson());vpost({code:vcode,lyrics:JSON.parse(vsent)})}
+  else if(m.ok){vlive=true;toast('Video loaded')}
+  else if(m.error)vError(m.error)});
+// Timing edits reach the video within a tenth of a second.
+function vSync(t){if(!vlive)return;const now=performance.now();
+  if(now-vchk>100){vchk=now;const s=JSON.stringify(toJson());if(s!==vsent){vsent=s;vpost({lyrics:JSON.parse(s)})}}
+  vpost({t})}
+// the input is cleared so a corrected file with the same name can be uploaded again
+$('fV').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)loadVideo(f)};
+$('vx').onclick=vRemove;
+$('vr').onclick=()=>copy(RULES,'Instructions copied');
+$('verrC').onclick=()=>copy($('verrT').textContent,'Error copied');
+
 /* ---------- save ---------- */
 let dl=null;(async()=>{try{dl=window.claude&&await window.claude.use('downloads')}catch(e){}})();
 async function saveFile(fn,data,type){if(!D.words.length)return toast('Load an SRT first');
@@ -350,7 +430,7 @@ $('sS').onclick=()=>saveFile((name||'lyrics')+'.synced.srt',toSrt(),'text/plain'
 
 /* ---------- loop ---------- */
 let litIdx=-1;
-(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';drawStage(t);
+(function loop(){const t=au.currentTime||0;$('clock').textContent=fmt(t)+(dur?' / '+fmt(dur):'');$('ph').style.left=X(t)+'px';vf?vSync(t):drawStage(t);
   let li=-1;for(let i=0;i<D.words.length;i++){if(t>=D.words[i].s&&t<D.words[i].e){li=i;break}}
   if(li!==litIdx){document.querySelectorAll('.clip.lit').forEach(n=>n.classList.remove('lit'));const n=document.querySelector(`.clip.w[data-i="${li}"]`);n&&n.classList.add('lit');litIdx=li}
   if(!au.paused&&!drag){const x=X(t)-tl.scrollLeft;if(x>tl.clientWidth*.8||x<0)tl.scrollLeft=X(t)-tl.clientWidth*.2}
